@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2022.7.15)  28 OCT 2022 17:58
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2022.7.15)  28 OCT 2022 18:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -963,24 +963,24 @@ ype bmp)
 File: ../images/accuracy-1000-20-binary_crossentropy-adam-100-4.png Graphic fil
 e (type bmp)
 <../images/accuracy-1000-20-binary_crossentropy-adam-100-4.png>
-File: ../images/regions/0-region.png Graphic file (type bmp)
-<../images/regions/0-region.png>
-File: ../images/regions/10-region.png Graphic file (type bmp)
-<../images/regions/10-region.png>
-File: ../images/regions/20-region.png Graphic file (type bmp)
-<../images/regions/20-region.png>
-File: ../images/regions/30-region.png Graphic file (type bmp)
-<../images/regions/30-region.png>
-File: ../images/regions/40-region.png Graphic file (type bmp)
-<../images/regions/40-region.png>
-File: ../images/regions/50-region.png Graphic file (type bmp)
-<../images/regions/50-region.png>
-File: ../images/regions/60-region.png Graphic file (type bmp)
-<../images/regions/60-region.png>
-File: ../images/regions/70-region.png Graphic file (type bmp)
-<../images/regions/70-region.png>
-File: ../images/regions/80-region.png Graphic file (type bmp)
-<../images/regions/80-region.png>
+File: ../images/regions/0-region-v.png Graphic file (type bmp)
+<../images/regions/0-region-v.png>
+File: ../images/regions/10-region-v.png Graphic file (type bmp)
+<../images/regions/10-region-v.png>
+File: ../images/regions/20-region-v.png Graphic file (type bmp)
+<../images/regions/20-region-v.png>
+File: ../images/regions/30-region-v.png Graphic file (type bmp)
+<../images/regions/30-region-v.png>
+File: ../images/regions/40-region-v.png Graphic file (type bmp)
+<../images/regions/40-region-v.png>
+File: ../images/regions/50-region-v.png Graphic file (type bmp)
+<../images/regions/50-region-v.png>
+File: ../images/regions/60-region-v.png Graphic file (type bmp)
+<../images/regions/60-region-v.png>
+File: ../images/regions/70-region-v.png Graphic file (type bmp)
+<../images/regions/70-region-v.png>
+File: ../images/regions/80-region-v.png Graphic file (type bmp)
+<../images/regions/80-region-v.png>
 File: ../images/loss-4000-6-binary_crossentropy-rmsprop-100-4.png Graphic file 
 (type bmp)
 <../images/loss-4000-6-binary_crossentropy-rmsprop-100-4.png>
@@ -1022,7 +1022,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 269.
  ) 
 Here is how much of TeX's memory you used:
  18599 strings out of 481761
- 336023 string characters out of 5935872
+ 336131 string characters out of 5935872
  666346 words of memory out of 5000000
  35240 multiletter control sequences out of 15000+600000
  546380 words of font info for 129 fonts, out of 8000000 for 9000
