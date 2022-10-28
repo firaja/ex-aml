@@ -121,7 +121,7 @@ def start():
 
 	# Main configurations
 	m, n, = 4000, 6
-	loss, opt, e, bs = 'binary_crossentropy', 'adam', 1, 4
+	loss, opt, e, bs = 'binary_crossentropy', 'adam', 100, 4
 
 	# Generate date
 	X, y = checkerboard_problem(m=m, nrows=n, ncols=n, nclasses = 2, I = [10,20])
@@ -147,7 +147,7 @@ def start():
 	model.compile(loss=loss, optimizer=opt, metrics=["acc"])
 
 	# Training
-	history = model.fit(X_train, y_train, epochs=e, batch_size=bs, verbose=1, validation_split=0.2, callbacks=[])
+	history = model.fit(X_train, y_train, epochs=e, batch_size=bs, verbose=1, validation_split=0.2, callbacks=[show_boundaries])
 
 	# Plot training & validation accuracy values
 	plt.plot(history.history['acc'])

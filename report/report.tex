@@ -59,12 +59,6 @@
 
 
 
-\begin{abstract}
-In this brief work we trained a FNN in order to classify points in a check pattern.
-\end{abstract}
-
-
-
 \section{Inspecting the data}
 The data provided consists of an set of points $X \in \{(x_1, x_2) | 10 \leq x_1, x_2 \leq 20\}$ and a set of binary labels $y \in \{0, 1\}$.
 The points in $X$ follow a uniform distribution with mean $\mu = 14.97$ and variance $\sigma = 8.3$; the $0$s and $1$s in $y$ are quite uniformely distributed with 
@@ -96,7 +90,10 @@ and since the definition of $tanh(x)$ can be derived from $cos(ix)$ and $sin(ix)
 
 Because we are trying to classify points between two classes, the output function is a sigmoid. \par
 
-Finally, the network architecture is composed by 4 hidden dense layers of rispectively 200, 150, 100 and 50 nodes. Each node uses \texttt{LeakyReLU} as activator function with $\alpha=0.1$. The output node computes the sigmoid logistic function so that the output ranges between $0$ and $1$.
+Finally, the network architecture is composed by 4 hidden dense layers of rispectively 200, 150, 100 and 50 nodes. We tried with less hidden layers (2 and 3) and less nodes for each
+layer (100, 50, 25, 10) but the performance where worse in terms of convergence speed and decision boundaries. Since the different configurations have similar training times, we chose this configuration over a lighter one.
+
+Each node uses \texttt{LeakyReLU} as activator function with $\alpha=0.1$. The output node computes the sigmoid logistic function so that the output ranges between $0$ and $1$.
 
 \begin{figure}[ht!]
 \centering                                                                        
@@ -153,12 +150,15 @@ all classes with the same importance while precision measures the model's accura
 
 
 \section{Analysis}
+From Figures \ref{fig:decision}, \ref{fig:loss} and \ref{fig:acc} we see that the model correctly classifies almost all the points after 60 epochs (accuracy $\geq 90\%$). This is a good result but we expected that the model could figure out what is the general rule under the provided classification.  
 As we can see from Figure \ref{fig:decision}, as the accuracy of the model increases, it is clear that the model fails to recognize the \emph{check pattern} itself. Even if it is true that the accuracy reaches a score of $93\%$, the model overfits the data and could not generalize the pattern beyond the region occupied by training data. 
-This means that a point in $(9, 17)$ is classified by the model as orange checker instead of blue. Figure \ref{fig:trend} shows a simplified trend in model's prediction if we increase the number of epochs.
+This means that a point outside the original training set (\emph{e.g.} $(9, 19)$) is classified by the model in the same way of the nearest checker (\emph{e.g.} orange instead of blue, even if the checker on its left is orange). \par
+What happens is that the pattern predicted by the model is a checkerboard with the external checkers stretched infinitely outwards.
+Figure \ref{fig:trend} shows a simplified trend in model's prediction if we increase the number of epochs.
 
 \begin{figure}[ht!]
 \centering                                                                        
-\includegraphics[width=3in]{../images/trend.png}
+\includegraphics[width=2.5in]{../images/trend.png}
 \captionsetup{justification=centering}                                                                                                                                   
 \caption{Trend of the decision boundaries of the model}
 \label{fig:trend}                                                                                                                                                           
