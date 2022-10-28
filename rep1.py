@@ -14,8 +14,6 @@ import pandas as pd
 from mlxtend.plotting import plot_decision_regions
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, LabelEncoder
-from sklearn.metrics import confusion_matrix
-from mlxtend.plotting import plot_confusion_matrix
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Activation, LeakyReLU
 
@@ -26,26 +24,6 @@ SEED = 42
 np.random.seed(SEED)
 tf.random.set_seed(SEED)
 torch.manual_seed(SEED)
-
-class PerformancePlotCallback(tf.keras.callbacks.Callback):
-	
-	def __init__(self, X_test, y_test, n_epochs_log = 5, save=True):
-		self.X_test = X_test
-		self.y_test = y_test
-		self.n_epochs_log = n_epochs_log
-		self.save = save
-	
-	def on_batch_end(self, epoch, logs={}):
-		return
-	
-	def on_epoch_end(self, epoch, logs={}, ):
-		if epoch % self.n_epochs_log == 0:
-			plot_decision_regions(self.X_test, self.y_test, clf=self.model, legend=2, colors='C0,C1', markers='oo')
-			if self.save:
-				plt.savefig('./images/regions/{0}-region.png'.format(epoch), bbox_inches='tight')
-			else:
-				plt.show()
-			plt.close()
 
 def get_samples(m, I, is_grid):
 	if not is_grid:
@@ -107,67 +85,45 @@ def preprocess_data(X, scaler):
 	X = scaler.transform(X)
 	return X, scaler
 
-def build_model(input_shape):
-	model = Sequential()
-	model.add(Dense(200, input_shape=input_shape, activation=LeakyReLU(alpha=0.1), kernel_initializer="he_uniform")) 
-	model.add(Dense(150, activation=LeakyReLU(alpha=0.1), kernel_initializer="he_uniform")) 
-	model.add(Dense(100, activation=LeakyReLU(alpha=0.1), kernel_initializer="he_uniform")) 
-	model.add(Dense(50, activation=LeakyReLU(alpha=0.1), kernel_initializer="he_uniform")) 
-	model.add(Dense(1, activation="sigmoid"))
-	return model
+
 
 
 def start():
 
 	# Main configurations
-	m, n, = 4000, 6
-	loss, opt, e, bs = 'binary_crossentropy', 'adam', 1, 4
+	m, n, = 1000, 20
+	loss, opt, e, bs = 'binary_crossentropy', 'adam', 100, 4
 
 	# Generate date
 	X, y = checkerboard_problem(m=m, nrows=n, ncols=n, nclasses = 2, I = [10,20])
 
-	
-	# Data split
-	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=SEED, shuffle = True, stratify = None)
+	unique, counts = np.unique(y, return_counts=True)
+
+	print(dict(zip(unique, counts)))
 
 	
+	# Data split
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEED, shuffle = True, stratify = None)
+
+	
+	print (np.average(y))
+	print (np.var(y))
+
+	print (np.average(X_train))
+	print (np.var(X_test))
+
 
 	# Train preprocessing
 	X_train, scaler = preprocess_data(X_train, StandardScaler())
 	X_test, _ = preprocess_data(X_test, StandardScaler())
 
+	print (np.average(X_train))
+	print (np.var(X_test))
 
 	plot_data(X, y)
 
-	# NN model
-	model = build_model((X_train.shape[1], ))
 
-	show_boundaries = PerformancePlotCallback(X_test, y_test, n_epochs_log = 10)
 
-	model.compile(loss=loss, optimizer=opt, metrics=["acc"])
-
-	# Training
-	history = model.fit(X_train, y_train, epochs=e, batch_size=bs, verbose=1, validation_split=0.2, callbacks=[])
-
-	# Plot training & validation accuracy values
-	plt.plot(history.history['acc'])
-	plt.plot(history.history['val_acc'])
-	plt.title('Model accuracy')
-	plt.ylabel('Accuracy')
-	plt.xlabel('Epoch')
-	plt.legend(['Train', 'Test'], loc='upper left')
-	plt.savefig('./images/accuracy-{}-{}-{}-{}-{}-{}.png'.format(m, n, loss, opt, e, bs))
-
-	plt.clf()
-
-	# Plot training & validation loss values
-	plt.plot(history.history['loss'])
-	plt.plot(history.history['val_loss'])
-	plt.title('Model loss')
-	plt.ylabel('Loss')
-	plt.xlabel('Epoch')
-	plt.legend(['Train', 'Test'], loc='upper right')
-	plt.savefig('./images/loss-{}-{}-{}-{}-{}-{}.png'.format(m, n, loss, opt, e, bs))
 
 
 if __name__ == '__main__':
