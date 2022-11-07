@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""assignment1.py: Solution to the first assignment."""
+"""evaluate1.py: Evaluation of the first assignment."""
 __author__      = "David Bertoldi"
 
 
@@ -19,7 +19,8 @@ from mlxtend.plotting import plot_confusion_matrix
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Activation, LeakyReLU
 from tensorflow.keras.callbacks import ModelCheckpoint
-
+from mlxtend.plotting import plot_confusion_matrix
+from sklearn.metrics import confusion_matrix
 
 
 
@@ -31,9 +32,9 @@ torch.manual_seed(SEED)
 
 class PerformancePlotCallback(tf.keras.callbacks.Callback):
 	
-	def __init__(self, X, y, n_epochs_log = 5, save=True):
-		self.X = X
-		self.y = y
+	def __init__(self, X_test, y_test, n_epochs_log = 5, save=True):
+		self.X_test = X_test
+		self.y_test = y_test
 		self.n_epochs_log = n_epochs_log
 		self.save = save
 	
@@ -42,7 +43,7 @@ class PerformancePlotCallback(tf.keras.callbacks.Callback):
 	
 	def on_epoch_end(self, epoch, logs={}, ):
 		if epoch % self.n_epochs_log == 0:
-			plot_decision_regions(self.X, self.y, clf=self.model, legend=2, colors='C0,C1', markers='oo')
+			plot_decision_regions(self.X_test, self.y_test, clf=self.model, legend=2, colors='C0,C1', markers='oo')
 			if self.save:
 				plt.savefig('./images/regions/{0}-region.png'.format(epoch), bbox_inches='tight')
 			else:
@@ -123,7 +124,7 @@ def start():
 
 	# Main configurations
 	m, n, = 4000, 6
-	loss, opt, e, bs = 'binary_crossentropy', 'adam', 100, 4
+	
 
 	# Generate date
 	X, y = checkerboard_problem(m=m, nrows=n, ncols=n, nclasses = 2, I = [10,20])
@@ -148,40 +149,25 @@ def start():
 	# NN model
 	model = build_model((X_train.shape[1], ))
 
-	show_boundaries = PerformancePlotCallback(X_val, y_val, n_epochs_log = 10)
 
-	model.compile(loss=loss, optimizer=opt, metrics=["acc"])
+	model.load_weights('acc.hdf5')
 
-	# Checkpoints
-	mcp_save_acc = ModelCheckpoint('./acc.hdf5',
-									save_best_only=True,
-									monitor='val_acc', mode='max')
-	mcp_save_loss = ModelCheckpoint('./loss.hdf5',
-									save_best_only=True,
-									monitor='val_loss', mode='min')
 
-	# Training
-	history = model.fit(X_train, y_train, epochs=e, batch_size=bs, verbose=1, validation_data=(X_val, y_val), callbacks=[show_boundaries, mcp_save_acc, mcp_save_loss])
+	Y_test_pred = model.predict(X_test)
+	
+	y_test_pred = [1 * (x[0]>=0.5) for x in Y_test_pred]
+	
+	cm = confusion_matrix(y_test, y_test_pred)
+	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(10,10))
+	plt.savefig('./images/cm.png', bbox_inches='tight')
+	
+	plot_decision_regions(X_test, y_test, clf=model, legend=2, colors='C0,C1', markers='oo')
+	plt.savefig('./images/region.png', bbox_inches='tight')
 
-	# Plot training & validation accuracy values
-	plt.plot(history.history['acc'])
-	plt.plot(history.history['val_acc'])
-	plt.title('Model accuracy')
-	plt.ylabel('Accuracy')
-	plt.xlabel('Epoch')
-	plt.legend(['Train', 'Test'], loc='upper left')
-	plt.savefig('./images/accuracy-{}-{}-{}-{}-{}-{}.png'.format(m, n, loss, opt, e, bs))
+	plt.close()
 
-	plt.clf()
 
-	# Plot training & validation loss values
-	plt.plot(history.history['loss'])
-	plt.plot(history.history['val_loss'])
-	plt.title('Model loss')
-	plt.ylabel('Loss')
-	plt.xlabel('Epoch')
-	plt.legend(['Train', 'Test'], loc='upper right')
-	plt.savefig('./images/loss-{}-{}-{}-{}-{}-{}.png'.format(m, n, loss, opt, e, bs))
+
 
 
 if __name__ == '__main__':
