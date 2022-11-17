@@ -1,0 +1,10 @@
+\BOOKMARK [1][-]{section.1}{Inspecting\040the\040data}{}% 1
+\BOOKMARK [1][-]{section.2}{Preparing\040the\040data}{}% 2
+\BOOKMARK [1][-]{section.3}{Unregularized\040FFNN}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{The\040network}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{Training}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.3}{Evaluation}{section.3}% 6
+\BOOKMARK [1][-]{section.4}{Regularized\040FFNN}{}% 7
+\BOOKMARK [2][-]{subsection.4.1}{The\040network}{section.4}% 8
+\BOOKMARK [2][-]{subsection.4.2}{Regularization\040techniques}{section.4}% 9
+\BOOKMARK [3][-]{subsubsection.4.2.1}{Data\040augmentation}{subsection.4.2}% 10

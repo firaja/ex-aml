@@ -48,7 +48,6 @@ def build_model(input_shape, classes, activation, initializer):
 	model = Sequential()
 	model.add(Dense(80, activation = activation, kernel_initializer=initializer, input_shape=input_shape))
 	model.add(Dense(70, activation = activation,  kernel_initializer=initializer))
-	#model.add(Dense(55, activation = activation,  kernel_initializer=initializer))
 	model.add(Dense(classes, activation = "softmax", kernel_initializer=initializer))
 	return model
 
@@ -60,7 +59,7 @@ def start():
 	num_of_lables = len(set(np.concatenate((y_train, y_test))))
 
 	# Separate the test data
-	X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.15, random_state=SEED, shuffle=True, stratify = None)
+	X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.20, random_state=SEED, shuffle=True, stratify = None)
 
 	#scaling
 	X_train = X_train.astype('float32') / 255.
@@ -77,9 +76,9 @@ def start():
 	selected_labels = range(num_of_lables)
 
 	#one-hot encoding
-	Y_train = np_utils.to_categorical(y_train)
-	Y_val = np_utils.to_categorical(y_val)
-	Y_test = np_utils.to_categorical(y_test)
+	Y_train = np_utils.to_categorical(y_train-1)
+	Y_val = np_utils.to_categorical(y_val-1)
+	Y_test = np_utils.to_categorical(y_test-1)
 
 
 	input_dims = np.prod(X_test.shape[1:]) #784
@@ -89,7 +88,7 @@ def start():
 
 
 	
-	activation = LeakyReLU(alpha=0.01)
+	activation = 'sigmoid'#LeakyReLU(alpha=0.01)
 	optimizer = Adam(learning_rate=1e-03)
 	initializer = HeNormal(seed=SEED)
 	loss = 'categorical_crossentropy'

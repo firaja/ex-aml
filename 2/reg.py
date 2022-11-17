@@ -57,7 +57,7 @@ def build_model(input_shape, classes, activation, initializer, regularizer, drop
 	model = Sequential()
 	model.add(Dense(80, activation = activation, kernel_initializer=initializer, kernel_regularizer=regularizer, input_shape=input_shape))
 	model.add(Dropout(dropout))
-	model.add(Dense(60, activation = activation,  kernel_initializer=initializer, kernel_regularizer=regularizer))
+	model.add(Dense(70, activation = activation,  kernel_initializer=initializer, kernel_regularizer=regularizer))
 	model.add(Dropout(dropout))
 	model.add(Dense(classes, activation = "softmax", kernel_initializer=initializer, kernel_regularizer=regularizer))
 	return model
@@ -79,7 +79,7 @@ def augment_data(X_train, y_train, n):
 		samples = get_samples(k, X_train, y_train)
 
 		x = (h - len(samples)) // 10
-		results = rotate(samples, x, random.uniform(-20, 20))
+		results = rotate(samples, x, random.uniform(-15, 15))
 		
 		y_res = np.append(y_res, [k]*len(results))
 		X_res = np.append(X_res, results, axis=0)
@@ -95,11 +95,11 @@ def augment_data(X_train, y_train, n):
 #		plt.show()
 
 	
-	for i, (img, label) in enumerate(zip(X_train, y_train)):
-		if random.randint(1, 20) == 1: 
-			picked = random.randint(0, X_res.shape[0])
-			X_res = np.append(X_res, np.array([shift_image(X_res[picked], [-2,0,2][random.randrange(3)], [-2,0,2][random.randrange(3)])]),  axis=0)
-			y_res = np.append(y_res, label)
+#	for i, (img, label) in enumerate(zip(X_train, y_train)):
+#		if random.randint(1, 20) == 1: 
+#			picked = random.randint(0, X_res.shape[0])
+#			X_res = np.append(X_res, np.array([shift_image(X_res[picked], [-2,0,2][random.randrange(3)], [-2,0,2][random.randrange(3)])]),  axis=0)
+#			y_res = np.append(y_res, label)
 
 
 	return X_res, y_res
@@ -156,7 +156,6 @@ def start():
 	
 
 	#X_train, y_train = augment_data(X_train, y_train, num_of_lables)
-	
 	#X_train, y_train = shuffle(X_train, y_train, random_state=SEED)
 	
 	
@@ -177,9 +176,9 @@ def start():
 	selected_labels = range(num_of_lables)
 
 	#one-hot encoding
-	Y_train = np_utils.to_categorical(y_train)
-	Y_val = np_utils.to_categorical(y_val)
-	Y_test = np_utils.to_categorical(y_test)
+	Y_train = np_utils.to_categorical(y_train-1)
+	Y_val = np_utils.to_categorical(y_val-1)
+	Y_test = np_utils.to_categorical(y_test-1)
 
 
 	input_dims = np.prod(X_test.shape[1:]) #784
@@ -189,9 +188,9 @@ def start():
 
 
 	
-	activation = LeakyReLU(alpha=0.001)
+	activation = LeakyReLU(alpha=0.01)
 	optimizer = Adam(learning_rate=1e-03)
-	regularizer = None#L2(1e-04)
+	regularizer = None#L2(1e-05)
 	initializer = HeNormal(seed=SEED)
 	loss = 'categorical_crossentropy'
 	dropout = 0.1
@@ -220,7 +219,7 @@ def start():
 									verbose=1)
 
 	e = 50
-	bs = 64
+	bs = 256
 
 
 	history = model.fit(X_train,Y_train,

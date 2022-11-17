@@ -64,27 +64,38 @@ def start():
 	print('mean: {}    stdev: {}'.format(mean, stdev))
 
 	n, bins, patches = plt.hist(y_train, bins=50)
-	plt.show()
+	
+	cmap = plt.cm.viridis
+
+	for i, (ccc, value, bar) in enumerate(zip(n, bins, patches)):
+		bar.set_facecolor(cmap(ccc/n.max()))
+	#plt.show()
 
 
 	number = 39
 
 	trains = []
 	for i in range(len(X_train)):
-		if y_train[i] == number:
-			trains.append(X_train[i])
+		trains.append(X_train[i])
 
 	w = 39
 	h = 28
 	fig = plt.figure(figsize=(20, 20))
-	columns = 5
-	rows = 5
-	for i in range(1, columns*rows +1):
-	    img = trains[i]
-	    fig.add_subplot(rows, columns, i)
-	    plt.imshow(img)
+	columns = 3
+	rows = 2
+	seen = []
+	i = 1
+	while i < columns*rows + 1:
+		k = [17, 106, 136, 242, 272, 280][i-1] +0
+		img = X_train[k]
+		ax = fig.add_subplot(rows, columns, i)
+		plt.axis('off')
+		ax.set_title('Number ' + str(y_train[k]), fontsize=30)
+		plt.imshow(img, cmap='gray')
+		i += 1
 	plt.show()
 
+# 17 106 136 242 272 280
 
 def format(s, activation, loss, optimizer, e, bs):
 	return s.format(activation if isinstance(activation, str) else type(activation).__name__,

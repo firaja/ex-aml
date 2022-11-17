@@ -27,6 +27,8 @@ from tensorflow.keras.optimizers import Adam, Nadam, SGD
 from tensorflow.keras.initializers import HeNormal, HeUniform
 from mlxtend.plotting import plot_confusion_matrix
 from sklearn.metrics import confusion_matrix
+import matplotlib
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 
 
@@ -63,7 +65,7 @@ def start():
 	num_of_lables = len(set(np.concatenate((y_train, y_test))))
 
 	# Separate the test data
-	X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.15, random_state=SEED, shuffle=True, stratify = None)
+	X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.20, random_state=SEED, shuffle=True, stratify = None)
 
 	#scaling
 	X_train = X_train.astype('float32') / 255.
@@ -80,9 +82,9 @@ def start():
 	selected_labels = range(num_of_lables)
 
 	#one-hot encoding
-	Y_train = np_utils.to_categorical(y_train)
-	Y_val = np_utils.to_categorical(y_val)
-	Y_test = np_utils.to_categorical(y_test)
+	Y_train = np_utils.to_categorical(y_train-1)
+	Y_val = np_utils.to_categorical(y_val-1)
+	Y_test = np_utils.to_categorical(y_test-1)
 
 
 	input_dims = np.prod(X_test.shape[1:]) #784
@@ -92,7 +94,7 @@ def start():
 
 
 	
-	activation = LeakyReLU(alpha=0.01)
+	activation = 'sigmoid'#LeakyReLU(alpha=0.01)
 	optimizer = Adam(learning_rate=1e-03)
 	initializer = HeNormal(seed=SEED)
 	loss = 'categorical_crossentropy'
@@ -119,14 +121,25 @@ def start():
 
 	Y_val_pred = model.predict(X_val)
 	y_val_pred = Y_val_pred.argmax(1)
-	cm = confusion_matrix(y_val, y_val_pred)
-	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20))
-	plt.show()
+	cm = confusion_matrix(y_val, y_val_pred+1, labels=range(1,51))
+	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20), colorbar=True)
+	plt.xticks(np.arange(50), np.arange(1, 51))
+	plt.yticks(np.arange(50), np.arange(1, 51))
+	#plt.show()
+
+
+	viridis = matplotlib.cm.get_cmap('viridis_r', 330)
+	newcolors = viridis(np.linspace(0, 1, 330))
+	white = np.array([1, 1, 1, 1])
+	newcolors[:10, :] = white
+	newcmp = ListedColormap(newcolors)
 
 	Y_test_pred = model.predict(X_test)
 	y_test_pred = Y_test_pred.argmax(1)
-	cm = confusion_matrix(y_test, y_test_pred)
-	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20))
+	cm = confusion_matrix(y_test, y_test_pred+1)
+	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20), colorbar=True, cmap=newcmp)
+	plt.xticks(np.arange(50), np.arange(1, 51))
+	plt.yticks(np.arange(50), np.arange(1, 51))
 	plt.show()
 
 

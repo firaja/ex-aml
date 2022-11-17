@@ -27,7 +27,8 @@ from tensorflow.keras.optimizers import Adam, Nadam, SGD
 from tensorflow.keras.initializers import HeNormal, HeUniform
 from mlxtend.plotting import plot_confusion_matrix
 from sklearn.metrics import confusion_matrix
-
+import matplotlib
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 
 
@@ -49,11 +50,11 @@ def load_data():
 
 def build_model(input_shape, classes, activation, initializer, regularizer, dropout):
 	model = Sequential()
-	model.add(Dense(80, activation = activation, kernel_initializer=initializer, input_shape=input_shape))
+	model.add(Dense(80, activation = activation, kernel_initializer=initializer, kernel_regularizer=regularizer, input_shape=input_shape))
 	model.add(Dropout(dropout))
-	model.add(Dense(60, activation = activation,  kernel_initializer=initializer))
+	model.add(Dense(70, activation = activation,  kernel_regularizer=regularizer, kernel_initializer=initializer))
 	model.add(Dropout(dropout))
-	model.add(Dense(classes, activation = "softmax", kernel_initializer=initializer))
+	model.add(Dense(classes, activation = "softmax", kernel_regularizer=regularizer, kernel_initializer=initializer))
 	return model
 
 
@@ -82,9 +83,9 @@ def start():
 	selected_labels = range(num_of_lables)
 
 	#one-hot encoding
-	Y_train = np_utils.to_categorical(y_train)
-	Y_val = np_utils.to_categorical(y_val)
-	Y_test = np_utils.to_categorical(y_test)
+	Y_train = np_utils.to_categorical(y_train-1)
+	Y_val = np_utils.to_categorical(y_val-1)
+	Y_test = np_utils.to_categorical(y_test-1)
 
 
 	input_dims = np.prod(X_test.shape[1:]) #784
@@ -96,7 +97,7 @@ def start():
 	
 	activation = LeakyReLU(alpha=0.01)
 	optimizer = Adam(learning_rate=1e-03)
-	regularizer = L2(1e-03)
+	regularizer = None#L2(1e-03)
 	initializer = HeNormal(seed=SEED)
 	loss = 'categorical_crossentropy'
 	dropout = 0.1
@@ -124,14 +125,22 @@ def start():
 
 	Y_val_pred = model.predict(X_val)
 	y_val_pred = Y_val_pred.argmax(1)
-	cm = confusion_matrix(y_val, y_val_pred)
+	cm = confusion_matrix(y_val, y_val_pred+1)
 	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20))
 	plt.show()
 
+	viridis = matplotlib.cm.get_cmap('viridis_r', 330)
+	newcolors = viridis(np.linspace(0, 1, 330))
+	white = np.array([1, 1, 1, 1])
+	newcolors[:10, :] = white
+	newcmp = ListedColormap(newcolors)
+
 	Y_test_pred = model.predict(X_test)
 	y_test_pred = Y_test_pred.argmax(1)
-	cm = confusion_matrix(y_test, y_test_pred)
-	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20))
+	cm = confusion_matrix(y_test, y_test_pred+1)
+	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20), colorbar=True, cmap=newcmp)
+	plt.xticks(np.arange(50), np.arange(1, 51))
+	plt.yticks(np.arange(50), np.arange(1, 51))
 	plt.show()
 
 
