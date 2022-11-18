@@ -36,9 +36,9 @@ from collections import Counter
 
 BASE_URL = 'https://github.com/DBertazioli/multi-mnist_custom/raw/master/final_dataset/'
 SEED = 42
-np.random.seed(SEED)
-tf.random.set_seed(SEED)
-torch.manual_seed(SEED)
+#np.random.seed(SEED)
+#tf.random.set_seed(SEED)
+#torch.manual_seed(SEED)
 
 
 def load_data():
@@ -109,21 +109,21 @@ def start():
 
 
 	
-	activation = LeakyReLU(alpha=0.1)
+	activation = 'sigmoid'#LeakyReLU(alpha=0.1)
 	optimizer = Adam(lr=0.01)
 	regularizer = None#L2(1e-05)
 	initializer = HeNormal(seed=SEED)
 	loss = 'binary_crossentropy'
 	dropout = 0.0
 
-	latent_size = 28*39//20
+	latent_size = 28*39//28
 
 
 	input_, encoded, decoded, autoencoder = build_autoencoder((input_dims,), latent_size, activation, dropout, regularizer)
 	autoencoder.compile(optimizer=optimizer, loss=loss, metrics=['mse'])
 
 
-	e = 20
+	e = 50
 	bs = 512
 
 	early_stopping = EarlyStopping(monitor='val_mse', 
@@ -143,34 +143,19 @@ def start():
 
 	
 
-	# Plot training & validation accuracy values
-	plt.plot(history.history['mse'])
-	plt.plot(history.history['val_mse'])
-	plt.title('Model accuracy')
-	plt.ylabel('Accuracy')
-	plt.xlabel('Epoch')
-	plt.legend(['Train', 'Test'], loc='upper left')
-	plt.savefig(format('./images/auto/accuracy-{}-{}-{}-{}-{}-{}-{}.png', activation, regularizer, loss, optimizer, e, bs, dropout))
-
-	plt.clf()
-
-	# Plot training & validation loss values
-	plt.plot(history.history['loss'])
-	plt.plot(history.history['val_loss'])
-	plt.title('Model loss')
-	plt.ylabel('Loss')
-	plt.xlabel('Epoch')
-	plt.legend(['Train', 'Test'], loc='upper right')
-	plt.savefig(format('./images/auto/loss-{}-{}-{}-{}-{}-{}-{}.png', activation, regularizer, loss, optimizer, e, bs, dropout))
-	plt.close()
 	x_selected = X_test
 	encoded_imgs = Model(input_, encoded).predict(x_selected)
 	as_list = np.concatenate(encoded_imgs).ravel().tolist()
 	decoded_imgs = Model(encoded, decoded).predict(encoded_imgs)
 
+
+
+	#plt.hist(encoded_imgs.ravel(), bins=54, rwidth=0.8)
+	#plt.show()
+
 	
-	n = 10 
-	plt.figure(figsize=(20, 4))
+	n = 20 
+	plt.figure(figsize=(100, 100))
 	for i in range(n):
 		# original
 		ax = plt.subplot(2, n, i + 1)
@@ -209,18 +194,28 @@ def start():
 	output = Model(encoded, decoded).predict(news)
 	
 
-	plt.figure(figsize=(20, 4))
-	for i in range(n):
-		# generation
-		ax = plt.subplot(2, n, i + 1 + n)
-		plt.imshow(output[i].reshape(28, 39))
-		plt.gray()
-		ax.get_xaxis().set_visible(False)
-		ax.get_yaxis().set_visible(False)
+
+
+	fig, ax = plt.subplots(2,5)
+	ax = ax.flatten()
+	for i in range(10):
+		plottable_image = output[random.randint(0,n-1)].reshape(28, 39)
+		ax[i].get_xaxis().set_visible(False)
+		ax[i].get_yaxis().set_visible(False)
+		ax[i].imshow(plottable_image)
 	plt.show()
 	
 	
-
+	random_encodings = np.random.rand(20,latent_size)
+	output = Model(encoded, decoded).predict(random_encodings)
+	fig, ax = plt.subplots(2,5)
+	ax = ax.flatten()
+	for i in range(10):
+		plottable_image = output[random.randint(0,20-1)].reshape(28, 39)
+		ax[i].get_xaxis().set_visible(False)
+		ax[i].get_yaxis().set_visible(False)
+		ax[i].imshow(plottable_image)
+	plt.show()
 
 
 def format(s, activation, regularizer, loss, optimizer, e, bs, dropout):

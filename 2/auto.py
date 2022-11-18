@@ -91,9 +91,9 @@ def start():
 	X_test = X_test.reshape((X_test.shape[0], np.prod(X_test.shape[1:])))
 
 	#one-hot encoding
-	Y_train = np_utils.to_categorical(y_train-1)
-	Y_val = np_utils.to_categorical(y_val-1)
-	Y_test = np_utils.to_categorical(y_test-1)
+	Y_train = np_utils.to_categorical(y_train)
+	Y_val = np_utils.to_categorical(y_val)
+	Y_test = np_utils.to_categorical(y_test)
 
 
 	input_dims = np.prod(X_test.shape[1:]) #784
@@ -103,7 +103,7 @@ def start():
 
 
 	
-	activation = LeakyReLU(alpha=0.01)
+	activation = 'sigmoid'#LeakyReLU(alpha=0.01)
 	optimizer = Adam(learning_rate=1e-03)
 	regularizer = None#L2(1e-03)
 	initializer = HeNormal(seed=SEED)
@@ -113,74 +113,48 @@ def start():
 	
 
 
-	d = []
+	d = {}
 
 
-	for cp in range(20, 31):
+	
 
-		latent_size = 28*39//cp
+	latent_size = 28*39//28
 
-		encoded, decoded, autoencoder = build_autoencoder((input_dims,), latent_size, activation)
-		autoencoder.compile(optimizer=optimizer, loss=loss, metrics=['mse'])
-
-
-		e = 20
-		bs = 512
+	encoded, decoded, autoencoder = build_autoencoder((input_dims,), latent_size, activation)
+	autoencoder.compile(optimizer=optimizer, loss=loss, metrics=['mse'])
 
 
-		history = autoencoder.fit(X_train,X_train,
-							epochs=e, 
-							batch_size=bs, 
-							validation_data = (X_val, X_val), 
-							callbacks = [])
+	e = 50
+	bs = 512
 
 
-		score, acc = autoencoder.evaluate(X_test, X_test,
-                            batch_size=bs)
+	history = autoencoder.fit(X_train,X_train,
+						epochs=e, 
+						batch_size=bs, 
+						validation_data = (X_val, X_val), 
+						callbacks = [])
 
-		print('MSE:', acc)
 
-		d.append(acc)
 
-	df = pd.DataFrame(d)
-
-	#for k,v in d.items():
-	plt.plot(d)
-	#plt.legend()
-	plt.title('MSE vs compresion factor')
+	# Plot training & validation accuracy values
+	plt.plot(history.history['mse'])
+	plt.plot(history.history['val_mse'])
+	plt.title('Model MSE')
 	plt.ylabel('MSE')
-	plt.xlabel('Compression factor')
-	plt.xticks(np.arange(11), np.arange(20, 31))
-	plt.show()
+	plt.xlabel('Epoch')
+	plt.legend(['Train', 'Test'], loc='upper left')
+	plt.savefig('./images/auto/accuracy.png')
 
+	plt.clf()
 
-	#fig, axs = plt.subplots(4, 4)
-	#rand = X_test[np.random.randint(0, 8000, 16)].reshape((4, 4, 1, 28*39))
-
-	#display.clear_output() # If you imported display from IPython
-
-	#for i in range(4):
-	#    for j in range(4):
-	#        axs[i, j].imshow(autoencoder.predict(rand[i, j])[0].reshape(28, 39), cmap = "gray")
-	#        axs[i, j].axis("off")
-
-	#plt.subplots_adjust(wspace = 0, hspace = 0)
-	#plt.show()
-
-
-	#n = 20
-	#random_encodings = np.random.rand(20, latent_size)
-	#decoded_imgs = Model(encoded, decoded).predict(random_encodings)
-
-	#plt.figure(figsize=(20, 4))
-	#for i in range(n):
-	#	# generation
-	#	ax = plt.subplot(2, n, i + 1 + n)
-	#	plt.imshow(decoded_imgs[i].reshape(28, 39))
-	#	plt.gray()
-	#	ax.get_xaxis().set_visible(False)
-	#	ax.get_yaxis().set_visible(False)
-	#plt.show()
+	# Plot training & validation loss values
+	plt.plot(history.history['loss'])
+	plt.plot(history.history['val_loss'])
+	plt.title('Model loss')
+	plt.ylabel('Loss')
+	plt.xlabel('Epoch')
+	plt.legend(['Train', 'Test'], loc='upper right')
+	plt.savefig('./images/auto/loss.png')
 
 
 

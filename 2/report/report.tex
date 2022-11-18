@@ -262,7 +262,7 @@ not only to replicate the methodologies used with the unregularized model, but b
 \includegraphics[width=3.5in]{../images/reg/loss-LeakyReLU-NoneType-categorical_crossentropy-Adam-50-256-0.1.png}
 \captionsetup{justification=centering}                                                                                                                              
 \caption{Loss (unregularized)}
-\label{fig:loss2}                                                                                                                                                           
+\label{fig:loss2}                                                                                                                                         
 \end{figure}
 
 
@@ -283,12 +283,6 @@ had a higher capabilities to generalize the problem. \par
 The confusion matrix in Figure \ref{fig:regcm} shows the improvements made from the previous model: there are still some mismatches between predicted and true labels, but they have lower intensity \emph{i.e.} there are less cases where the $50$ is confused with $30$ ($-28\%$) or $19$ with $17$ ($-70\%$).\par
 The regularization definetely changed the network performances without changing the architecture per se.
 
-\section{Autoencoding}
-In this section we show how to build an autoencoder that compresses the knowledge of the original input and that reconstructs the input starting from the compessed (encoded) version.
-\subsection{The nerwork}
-
-
-
 \begin{figure}[ht!]
 \centering                                                                        
 \includegraphics[width=3.5in]{regcm.png}
@@ -298,7 +292,140 @@ In this section we show how to build an autoencoder that compresses the knowledg
 \end{figure}
 
 
+\section{Autoencoding}
+In this section we show how to build an autoencoder that compresses the knowledge of the original input and that reconstructs the input starting from the compessed (encoded) version.
+\subsection{The nerwork}
+Before deciding the compression rate, we describe here the foundamentals of the autoencoder's architecture. The input, like in the previous cases, is represented by a flatten version of the images, that is a $1\times1092$ array. Because it is an autoencoder, the same goes for the output. We chose 2 hidden layers for the encoding and 3 for decoding; we used this unbalancing since it easy for the network to compress information but harder to decompress them. So the decoding part uses a more complex model.\par
+The compression factor that defines the lenght of the encoding had been decided with a benchmark: we trained 10 networks with different compression factors (from 20 to 30) and analyzed their mean squared errors. Figure \ref{fig:multiacc} and \ref{fig:mse} demonstrates that the best compression factor was 20, that is having an encoded layer formed by 54 layers. This was quite predictable but it is worth to notice how the MSE didn't linearly follow the compression rate; and this fact wasn't obvious.\par
 
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{multiacc.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{MSE vs. number of epochs vs. compression factor}
+\label{fig:multiacc}
+\end{figure}
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{mse.png}
+\captionsetup{justification=centering}                                                                                                                              
+\caption{MSE with different compression factors}
+\label{fig:mse}                                                                                                                                         
+\end{figure}
+
+
+Figure \ref{fig:auto} shows the final architecuture of the autoencoder: 1092 neurons for input, 256 and 128 for encoding, 54 for storing the compressed knowledge, 128, 256 and 512 for decompression and 1092 for output.\par
+All the layers used \texttt{LeakyReLU} with $\alpha=0.01$ as activation function. The output layer used a \emph{Sigmoid} that better represents values between 0 and 1.
+
+\subsection{Training}
+For the training phase we used \emph{Adam} but with \emph{binary crossentropy} loss function. \emph{Binary crossentropy}, based on the logarithmic operation, 
+better avoids the effects present in the \emph{Sigmoid} function, that is based on the exponential function.
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{auto.png}
+\captionsetup{justification=centering}
+\caption{Final architecture of the autoencoder: in green the input, in yellow the encoders, in blue the latent layer, in red the encoder and in purple the output}
+\label{fig:auto}
+\end{figure}
+
+\subsection{Evaluation}
+The best way to evaluate the autoencoder, along with plotting the loss and the MSE, is to visualize the results (Figure \ref{fig:reproduce}). In the first row
+there are 10 samples from the test set while in the second row the output of the autoencoder. The similarity between the two sequences in quite high, but we
+can notice that the second row present a certain level of blurriness.
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{reproduce.png}
+\captionsetup{justification=centering}
+\caption{First row: original test data. Second row: the same input but reproduced by the autoencoder.}
+\label{fig:reproduce}
+\end{figure}
+
+\subsection{Generation}
+In order to generate random new samples, we trained the autoencoder as previously and used only the second part of the architecture, that is 
+from the encoded layer to the output (Figure \ref{fig:generator})
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=2.5in]{generator.png}
+\captionsetup{justification=centering}
+\caption{}
+\label{fig:generator}
+\end{figure}
+
+We fed the model with random numbers with two different distributions: the first is a uniform distribution from 0 to 1 and the second a custom one we describe later.\par
+The random input with uniform distribution gave the results shown in Figure \ref{fig:unif}
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{unif.png}
+\captionsetup{justification=centering}
+\caption{New samples generated from a uniform distribution}
+\label{fig:unif}
+\end{figure}
+
+We can distinguish some numbers (like 38, 33, 40, 43 and 45) but they are blurry, lowly defined and redundant.
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{enco.png}
+\captionsetup{justification=centering}
+\caption{}
+\label{fig:enco}
+\end{figure}
+
+Because results were not exhaustive, we andalyzed the distribution in the encoded layer after having fed the network with the entire
+test set. Figure \ref{fig:enco} demonstrate that the distribution is far from being uniform.
+
+
+So we implemented a custom distribution that tried to emulate the real distribution
+present in the encoded layer after feeding the model with entire test set. Algorithm \ref{alg:ran} describes the procedure.
+
+\begin{algorithm}[h]
+\SetAlgoLined
+\KwData{$P \textnormal{ matrix of predictions over } X_{test}$, $n \in \mathbb{N} \textnormal{ number of encodings}$}
+\KwResult{\emph{$E \textnormal{ matrix of random } $n$ \textnormal{ encodings}$}}
+
+$E \gets \mathcal{M}(n \times 54)$\;
+\For{$i \gets 0$ \textbf{to} $n$}{
+
+\For{$j \gets 0$ \textbf{to} $54$}{
+
+$column \gets P_{*,j}$\;
+$m \gets \mu(column)$\;
+$s \gets \sigma(column)$\;
+$E_{i,j} \gets random(\mathcal{N}(m, s))$
+}
+
+}
+
+
+
+\Return $E$\;
+
+\caption{Simulator}\label{alg:ran}
+\end{algorithm}
+
+The procedure calculates a new matrix of encodings, generated by a normal distribution $\mathcal{N}(\mu, \sigma)$ on each column, where $\mu$ and $\sigma$ are calculated on the same column of the matrix of encodings. Since the first dimension describes different sequence, what is important is to maintain the distribution
+of each column. That's because the weights in the encoding layer (and in any other) cannot be permutated without affecting the final result of the model. That's why we emulated the distribution by column, assuming that is normally distributed (which is probably not, but this should require more time in investigation). 
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{gen.png}
+\captionsetup{justification=centering}
+\caption{}
+\label{fig:gen}
+\end{figure}
+
+Figure \ref{fig:gen} shows the results, which are way better than the ones generated with a uniform distribution. We can find sharper shapes, a little bit of more
+diversity in the digits (although there are many $3$s). What is very interesting is the appearance of a $98$, even if the network has been trained on numbers between $1$ and $50$. This suggests that the order of the weights matters but it doesn't describe the order of the digits; that is quite predictable since the layers are densely-connected and every neuron can affect any other neuron of the next layer.
 
 \end{document}
 
