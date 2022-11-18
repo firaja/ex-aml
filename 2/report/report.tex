@@ -125,7 +125,7 @@ The choice of the optimizer was among \emph{SGD}, \emph{RMSProp} and
 \emph{Adam} with \texttt{HeNormal}. \emph{SGD} with \texttt{HeNormal} resulted in a model that couldn't converge at all.
 
 We tried all of them and chose Adam with learning
-rate of $0.001$ , $\beta_1 = 0.9$ and $\beta_2 = 0.999$ because it seemed to
+rate of $10^{-3}$ , $\beta_1 = 0.9$ and $\beta_2 = 0.999$ because it seemed to
 escape better from local minima, converging faster and giving
 better accuracy. \par 
 Because we are trying to find which images best suits in one of the 50 classes, the best loss function is the \emph{Categorical Cross-Entropy}.\par
@@ -168,7 +168,7 @@ As metric we used the \emph{categorical accuracy} because calculates the percent
 \caption{Confusion matrix of the evaluation of the test set (unregularized network)}
 \label{fig:noregcm}                                                                                                                                                           
 \end{figure}
-The validation accuracy reached $93\%$ after 14 epochs and remained stable till the end. The categorical accuracy 
+The validation accuracy reached $91,5\%$ after 14 epochs and remained stable till the end. The categorical accuracy 
 over the test set reached $89\%$ and can be analyzed with the help of the confusion matrix (Figure \ref{fig:noregcm}). 
 The confusion matrix uses a custom colormap (a \emph{viridis} but with the first 10 values set to 0) so that was easier
 to hide negligible errors (in this case, less than 10 mismatches). It is noticeable that the model confuses number 50 with 30,
@@ -198,59 +198,6 @@ The first attempt of undirect regularization involved filling the gap between th
 By choosing $p=10\%$ each class diminuishes the gap with the major class by $10\%$. \par
 Three techniques were taken in account: \emph{adding noise}, \emph{image shifting} and \emph{image rotation}. The first added a gaussian noise $\mathcal{N}(0, \frac{1}{2})$, the second randomly shifted the image along the 2 axis by 2 in both directions and the third rotated the image by a random angle bewteen $-20^{\circ}$ and $20^{\circ}$. \par
 None of the above helped the network: the level of accuracy dropped to $86\%$ and the loss was very high when applying noise ($\geq 0.6$). Image roation alone is the only one that didn't make the accuracy worse. For these reasons data augmentation was discarded even if theoretically speaking filling the gap between samples makes sense. Probably the model already recognized single features for those samples so that adding similar samples just increased redundancy.
-
-
-\subsubsection{L1 and L2}
-\emph{L1} and \emph{L2}
-
-\subsubsection{Dropout}
-Dropout turned out to be a good choice: it dropped the overfitting without losing too much accuracy. We chose a drop out probability for each layer of $10\%$ because the network wasn't too big and higher probabilities gave worse results. This strategy helped the network to ignore certain features of the images or the $0s$ of the matrices (black spaces). A representation of the network can be found in Figure \ref{fig:regffnn}. 
-
-\begin{figure}[ht!]
-\centering                                                                        
-\includegraphics[width=2.5in]{regffnn.png}
-\captionsetup{justification=centering}                                                                                                           
-\caption{Architecture of the network with dropout}
-\label{fig:regffnn}
-\end{figure}
-
-\subsubsection{Early stopping}
-Another game changer was the application of \emph{early stopping} on the validation, with a patience of 10 epochs and $\delta = 0.05$. This greately reduced the overfitting and because the model converged after 15-20 epochs we restored the weights to the last best snapshot ($20^{\text{th}}$ epoch).
-
-
-
-
-
-
-
-
-\begin{figure}[ht!]
-\centering                                                                        
-\includegraphics[width=3.5in]{../images/reg/loss-LeakyReLU-NoneType-categorical_crossentropy-Adam-50-256-0.1.png}
-\captionsetup{justification=centering}                                                                                                                              
-\caption{Loss (unregularized)}
-\label{fig:loss2}                                                                                                                                                           
-\end{figure}
-
-
-\begin{figure}[ht!]
-\centering                                                                        
-\includegraphics[width=3.5in]{../images/reg/accuracy-LeakyReLU-NoneType-categorical_crossentropy-Adam-50-256-0.1.png}
-\captionsetup{justification=centering}                                                                                                                            
-\caption{Categorical accuracy (unregularized)}
-\label{fig:acc2}                                                                                                                                          
-\end{figure} 
-
-
-\subsection{Evaluation}
-\begin{figure}[ht!]
-\centering                                                                        
-\includegraphics[width=3.5in]{regcm.png}
-\captionsetup{justification=centering}
-\caption{Confusion matrix of the evaluation of the test set (regularized network)}
-\label{fig:regcm}
-\end{figure}
-
 
 \begin{algorithm}[h]
 \SetAlgoLined
@@ -282,6 +229,76 @@ $\text{append } k \text{ to } Y$\;
 
 \caption{Data augmentation algorithm}\label{alg:aug}
 \end{algorithm}
+
+
+\subsubsection{L1 and L2}
+\emph{L1} and \emph{L2} are typical techniques used to reduce the overfitting of the model by settings penalties in the coeffiecients. We tried first \emph{L1}, but even with low regularization factors (from $10^{-3}$ to $10^{-5}$) the model underfitted too much. \emph{L2} with a regularization factor of $10^{-5}$ performed better, similar to a a regularization factor of $10^{-4}$ and a learning rate 10 times higher ($10^{-2}$), but was outperformed in accuracy by a model non implementing it.
+
+\subsubsection{Dropout}
+Dropout turned out to be a good choice: it dropped the overfitting without losing too much accuracy. We chose a drop out probability for each layer of $10\%$ because the network wasn't too big and higher probabilities gave worse results. This strategy helped the network to ignore certain features of the images or the $0s$ of the matrices (black spaces). A representation of the network can be found in Figure \ref{fig:regffnn}. 
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=2.5in]{regffnn.png}
+\captionsetup{justification=centering}                                                                                                           
+\caption{Architecture of the network with dropout}
+\label{fig:regffnn}
+\end{figure}
+
+\subsubsection{Early stopping}
+Another game changer was the application of \emph{early stopping} on the validation, with a patience of 10 epochs and $\delta = 0.05$. This greately reduced the overfitting and because the model converged after 15-20 epochs we restored the weights to the last best snapshot ($20^{\text{th}}$ epoch).
+
+
+
+
+\subsection{Training}
+The optimizer used was \emph{Adam} with a learning rate of $10^{-3}$ in conjuction with $\texttt{HeNormal}$ initializer. We used 50 epochs and batches of 256 elements 
+not only to replicate the methodologies used with the unregularized model, but because outperformed other configurations. This means that the addition of dropout hasn't changed the quantity of information needed by the model before an update.
+
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/reg/loss-LeakyReLU-NoneType-categorical_crossentropy-Adam-50-256-0.1.png}
+\captionsetup{justification=centering}                                                                                                                              
+\caption{Loss (unregularized)}
+\label{fig:loss2}                                                                                                                                                           
+\end{figure}
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/reg/accuracy-LeakyReLU-NoneType-categorical_crossentropy-Adam-50-256-0.1.png}
+\captionsetup{justification=centering}                                                                                                                            
+\caption{Categorical accuracy (unregularized)}
+\label{fig:acc2}                                                                                                                                          
+\end{figure} 
+
+
+\subsection{Evaluation}
+
+The validation accuracy reached $93\%$ ($+1.5\%$ over the unregularized model) but with a training accuracy of $94\%$: this means the model had not memorized the dataset
+in favor of a better generalization. The test accuracy reached $92\%$ ($+3\%$) and this proved that the model implementing regularization techniques 
+had a higher capabilities to generalize the problem. \par
+The confusion matrix in Figure \ref{fig:regcm} shows the improvements made from the previous model: there are still some mismatches between predicted and true labels, but they have lower intensity \emph{i.e.} there are less cases where the $50$ is confused with $30$ ($-28\%$) or $19$ with $17$ ($-70\%$).\par
+The regularization definetely changed the network performances without changing the architecture per se.
+
+\section{Autoencoding}
+In this section we show how to build an autoencoder that compresses the knowledge of the original input and that reconstructs the input starting from the compessed (encoded) version.
+\subsection{The nerwork}
+
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{regcm.png}
+\captionsetup{justification=centering}
+\caption{Confusion matrix of the evaluation of the test set (regularized network)}
+\label{fig:regcm}
+\end{figure}
+
+
+
 
 \end{document}
 
