@@ -86,7 +86,7 @@ def start():
 
 	
 	# Separate the test data
-	X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.15, random_state=SEED, shuffle=True, stratify = None)
+	X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.20, random_state=SEED, shuffle=True, stratify = None)
 
 	#scaling
 	X_train = X_train.astype('float32') / 255.

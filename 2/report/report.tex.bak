@@ -32,14 +32,14 @@
 
 \maketitle 
 \section{Dataset}
-\subsection{Inspecting the data}\label{sec:data}
-The data provided consists of a set of gray-scale images containing 2-digits handwritten numbers. The images are always treated as
+\subsection{Inspecting the data}
+The data provided consinsts of a set of grey-scale images containing 2-digits handwrittend numbers. The images are always treated as
 2D matrices with values in the range $[0, 255]$.
 The source is a customization of the MNIST dataset: each image is composed by two digits coming from
 the original MNIST dataset that were overlapped with different intensities. This let the dataset to be expanded from
 numbers between 0 and 9 to numbers between 1 and 50. \par
 
-Figure \ref{fig:sample} shows the first 16 samples of the training dataset with different labels.
+Figure \ref{fig:sample} shows the first 16 samples of the training dataset with unique labels.
 
 \begin{figure}[ht!]
 \centering                                                                        
@@ -51,7 +51,7 @@ Figure \ref{fig:sample} shows the first 16 samples of the training dataset with 
 
 The data is already divided into training and test datasets. The first presents a non-uniform distribution of the classes,
 as shown in Figure \ref{fig:datahist}. 
-Many numbers have very low occurrences, like 43 with 117 samples or 17 with 130 samples, against other like 11 with 3112 samples or 19 with $2\,890$ samples.
+Many numbers have very low occurrencies, like 43 with 117 samples or 17 with 130 samples, against other like 11 with 3112 samples or 19 with $2\,890$ samples.
 As a matter o fact the number of sample for each class in the training dataset has mean $\mu\simeq 1\,671$ and standard deviation $\sigma\simeq 1\,045$.
 
 \begin{figure}[ht!]
@@ -64,7 +64,7 @@ As a matter o fact the number of sample for each class in the training dataset h
 
 
 Along with the biases of the dataset, some number at first sight are difficult to interpret even to the human eye. For example,
-Figure \ref{fig:unread} shows 6 difficult numbers to read: some have poorly defined lines and some have heavy overlaps. This may affect the
+Figure \ref{fig:unread} shows 6 difficult numbers to read: some have poorly defined lines and some have heavy overlappings. This may affect the
 model's performance if those irregularities are more present in some classes.\par
 
 
@@ -81,17 +81,17 @@ model's performance if those irregularities are more present in some classes.\pa
 Before training a FFNN using this images, encoded in $28\times39$ matrices with values from $0$ to $255$, we flattened them in
 arrays $1\times1\,092$ and rescaled each value in the continuous interval $[0, 1]$. This encoding will be used in every section of this work: a flat array
 better suits the input layer of a FFNN and small values increases the efficiency in the calculations
-\footnote{Even if the final choices made for this work led to the usage of activation functions that were not affected by \emph{exploding gradient}, rescaling the values of the matrices helped the experimentation with other activation functions that were affected.}.
+\footnote{Even if the final choices made for this work led to the usage of activation functions that were not affected by \emph{exploding gradient}, rescaling the values of the matrices helped the experimantations with other activation functions that were affected.}.
 
 
 \subsection{Preparing the data}
-As noted in section \ref{sec:data}, the dataset is divided into training and test samples. A validation subset is missing and thus
+As said in the section before, the dataset is divided into training and test samples. A validation subset is missing and thus
 is retrieved from the training set: $20\%$ of the images are randomly used for validation instead of training (along with their labels). \par
 About labels, we encoded them in one-hot vectors so that the $1$s are set in the index representing the numerical class. \par
 
 Another, technical, issue is that \texttt{np\_utils.to\_categorical}, used to create the one-hot vectors, generated 51 classes instead of 50. That's because the function created as many classes as the highest value inside the input plus one: it took for granted that we were using a zero-based index. In order
-to overcome this, without writing a similar function from scratch, we subtracted 1 to each element of each vector inside the training and test label sets.
-Obviously that operation had been reverted when trying to predict the values.
+to overcome this, without writing a similar function from scratch, we subracted 1 to each element of each vector inside the training and test label sets.
+Obvisously that operation had been reverted when trying to predict the values.
 
 
 \section{Unregularized FFNN}\label{sec:noreg}
@@ -121,7 +121,7 @@ Figure \ref{fig:noregffnn} shows the architecture of the network used in this se
 \label{fig:noregffnn}
 \end{figure}
 
-Each hidden neuron used the \emph{Sigmoid} as activation function. We tried \emph{LeakyReLU} with $\alpha=0.01$ as well but resulting in a divergence in the model (the validation loss kept to slightly grow after 15 epochs). The source was probably the explosion of the gradient caused by the function.  \par 
+Each hidden neuron used the \emph{Sigmoid} as activation function. We tried \emph{LeakyReLU} with $\alpha=0.01$ as well but resulting in a divergence in the model (the validation loss kept tp slighty grow after 15 epochs). The source was probably the explosion of the gradient caused by the function.  \par 
 The output layer computes a \emph{Softmax}, which converts the input vector of real values to an output vector that can be interpreted as categorical probabilities.
 
 \subsection{Training}
@@ -179,7 +179,7 @@ over the test set reached $89\%$ and can be analyzed with the help of the confus
 \caption{Confusion matrix of the evaluation of the test set (unregularized network)}
 \label{fig:noregcm}                                                                                                                        
 \end{figure}
-The confusion matrix uses a custom color-map (\emph{viridis} but with the first 10 values set to 0) so that was easier
+The confusion matrix uses a custom colormap (\emph{viridis} but with the first 10 values set to 0) so that was easier
 to hide negligible errors (in this case less than 10 mismatches) in such a large matrix. It is noticeable that the model confuses number 50 with 30,
 19 with 17, 34 with 39 and others. These errors are not only due to the similarity between their digits, but because
 these are the classes with less elements in the training set. So with no surprise the unbalances inside the training set played an
@@ -194,19 +194,19 @@ The aim of this section is to describe a FFNN with less than $100\,000$ paramete
 with high level of accuracy the digits from the dataset with one or more regularization technique. 
 
 \subsection{The network}
-We wanted to keep the network as similar as possible to the one described in Section \ref{sec:noreg} in order to better measure the effects of regularization.
+We wanted to keep the network as simiar as possible to the one described in Section \ref{sec:noreg} in order to better measure the effects of regularization.
 For this reason we used the very same architecture as base (2 layers, 80 and 70 neurons).
 The only thing that changed was the activation functions: we switched \emph{Sigmoid} with \emph{LeakyReLU}s because the first outperformed the second. Probably the effect of \emph{exploding gradient} was restrained by the regularization and a \emph{Sigmoid}-based model suffered too much the underfitting.
 
 
 \subsection{Regularization techniques}\label{sec:reg}
-In this section we describe the techniques tested, used or discarded to achieve a lower level of underfitting and secondary to reach a better level of accuracy.
+In this section we describe the techiques tested, used or discarded to achieve a lower level of underfitting and secondary to reach a better level of accuracy.
 
 \subsubsection{Data augmentation}
-The first attempt of indirect regularization involved filling the gap between the classes by generating new samples for the less populated classes. The procedure, described in Algorithm \ref{alg:aug}, generates for each class as many samples as there are in the percentage $p$ of the difference with the most populated class.
-By choosing $p=0.1$ each class diminished the gap with the major class by $10\%$. \par
-Three techniques were taken in account: \emph{adding noise}, \emph{image shifting} and \emph{image rotation}. The first added a Gaussian noise $\mathcal{N}(0, \frac{1}{2})$, the second randomly shifted the image long the 2 axis by 2 pixels (2 positions in the matrix) in both directions and the third rotated the image by a random angle between $-20^{\circ}$ and $20^{\circ}$. \par
-None of the above helped the network: the level of accuracy dropped to $86\%$ and the loss was very high when applying noise ($\geq 0.6$). Image rotation alone is the only one that didn't make the accuracy worse. For these reasons data augmentation was discarded even if theoretically speaking filling the gap between samples made sense. Probably the model already recognized the single features of those samples so that adding similar samples just increased redundancy.
+The first attempt of undirect regularization involved filling the gap between the classes by generating new samples for the less populated classes. The procedure, described in Algorithm \ref{alg:aug}, generates for each class as many samples as there are in the percentage $p$ of the difference with the most populated class.
+By choosing $p=0.1$ each class diminuished the gap with the major class by $10\%$. \par
+Three techniques were taken in account: \emph{adding noise}, \emph{image shifting} and \emph{image rotation}. The first added a gaussian noise $\mathcal{N}(0, \frac{1}{2})$, the second randomly shifted the image long the 2 axis by 2 pixels (2 positions in the matrix) in both directions and the third rotated the image by a random angle bewteen $-20^{\circ}$ and $20^{\circ}$. \par
+None of the above helped the network: the level of accuracy dropped to $86\%$ and the loss was very high when applying noise ($\geq 0.6$). Image roation alone is the only one that didn't make the accuracy worse. For these reasons data augmentation was discarded even if theoretically speaking filling the gap between samples made sense. Probably the model already recognized the single features of those samples so that adding similar samples just increased redundancy.
 
 \begin{algorithm}[h]
 \SetAlgoLined
@@ -241,7 +241,7 @@ $\text{append } k \text{ to } Y$\;
 
 
 \subsubsection{L1 and L2}
-\emph{L1} and \emph{L2} are typical techniques used to reduce the overfitting of the model by settings penalties in the coefficients. We tried first \emph{L1}, but even with low regularization factors (from $10^{-3}$ to $10^{-5}$) the model underfitted too much. \emph{L2} with a regularization factor of $10^{-5}$ performed better, similar to a a regularization factor of $10^{-4}$ and a learning rate 10 times higher ($10^{-2}$), but was outperformed in accuracy by a model not implementing it.
+\emph{L1} and \emph{L2} are typical techniques used to reduce the overfitting of the model by settings penalties in the coeffiecients. We tried first \emph{L1}, but even with low regularization factors (from $10^{-3}$ to $10^{-5}$) the model underfitted too much. \emph{L2} with a regularization factor of $10^{-5}$ performed better, similar to a a regularization factor of $10^{-4}$ and a learning rate 10 times higher ($10^{-2}$), but was outperformed in accuracy by a model not implementing it.
 
 \subsubsection{Dropout}
 \emph{Dropout} turned out to be a good choice: it decreased the overfitting without losing too much accuracy. We chose a drop out probability for each layer of $10\%$ because the network wasn't too big and higher probabilities gave worse results. This strategy helped the network to ignore certain features of the images or the $0s$ of the matrices (black spaces). A representation of the network can be found in Figure \ref{fig:regffnn}. 
@@ -255,13 +255,13 @@ $\text{append } k \text{ to } Y$\;
 \end{figure}
 
 \subsubsection{Early stopping}
-Another game changer was the application of \emph{early stopping} over the validation process, with a patience factor of 10 epochs and a minimum $\delta = 0.05$. This greatly reduced the overfitting and because the model converged after 15-20 epochs we restored the weights to the last best snapshot ($20^{\text{th}}$ epoch).
+Another game changer was the application of \emph{early stopping} over the validation process, with a patience factor of 10 epochs and a minimum $\delta = 0.05$. This greately reduced the overfitting and because the model converged after 15-20 epochs we restored the weights to the last best snapshot ($20^{\text{th}}$ epoch).
 
 
 
 
 \subsection{Training}
-The optimizer used was \emph{Adam} with a learning rate of $10^{-3}$ in conjunction with $\texttt{HeNormal}$ initializer. We used 50 epochs and batches of 256 elements 
+The optimizer used was \emph{Adam} with a learning rate of $10^{-3}$ in conjuction with $\texttt{HeNormal}$ initializer. We used 50 epochs and batches of 256 elements 
 not only to replicate the methodologies used with the unregularized model, but because outperformed other configurations. This means that the addition of dropout hasn't changed the quantity of information needed by the model before an update.
 
 
@@ -289,7 +289,7 @@ not only to replicate the methodologies used with the unregularized model, but b
 The validation accuracy reached $93\%$ ($+1.5\%$ over the unregularized model) but with a training accuracy of $94\%$: this means the model had less memorized the dataset in favor of a better generalization. The test accuracy reached $92\%$ ($+3\%$) and this proved that the model implementing regularization techniques 
 had a higher capabilities to generalize the problem. \par
 The confusion matrix in Figure \ref{fig:regcm} shows the improvements made from the previous model: there are still some mismatches between predicted and true labels, but they have lower intensity \emph{i.e.} there are less cases where the $50$ is confused with $30$ ($-28\%$) or $19$ with $17$ ($-70\%$).\par
-The regularization definitively changed the network performances without changing the architecture per se.
+The regularization definetely changed the network performances without changing the architecture per se.
 
 \begin{figure}[ht!]
 \centering                                                                        
@@ -301,10 +301,10 @@ The regularization definitively changed the network performances without changin
 
 
 \section{Autoencoding}
-In this section we show how to build an autoencoder that compresses the knowledge of the original input and that reconstructs the input starting from the compressed (encoded) version.
-\subsection{The network}\label{sec:autonet}
-Before deciding the compression rate, we describe here the fundamentals of the autoencoder's architecture. The input, like in the previous cases, is represented by a flatten version of the images, that is a $1\times1\,092$ array. Because it is an autoencoder, the same goes for the output. We chose 2 hidden layers for the encoder and 3 for decoder; we used this "unbalance" because it easy for the network to compress information but harder to decompress them. So the decoding part uses a more complex model.\par
-The compression factor that defines the length of the encoding had been decided with a benchmark: we trained 10 networks with different compression factors (from 20 to 30) and analyzed their mean squared errors (\emph{MSE}) when trying to reproduce the input. Figure \ref{fig:multiacc} and \ref{fig:mse} demonstrates that the best compression factor was $28$, that is having an encoded layer formed by 39 neurons. This result depends more on the architecture of the network rather than the problem itself, but it is noticeable and not so expected that the plot in Figure \ref{fig:mse} does not represent a monotonic function nor an increasing function.\par
+In this section we show how to build an autoencoder that compresses the knowledge of the original input and that reconstructs the input starting from the compessed (encoded) version.
+\subsection{The nerwork}\label{sec:autonet}
+Before deciding the compression rate, we describe here the foundamentals of the autoencoder's architecture. The input, like in the previous cases, is represented by a flatten version of the images, that is a $1\times1\,092$ array. Because it is an autoencoder, the same goes for the output. We chose 2 hidden layers for the encoder and 3 for decoder; we used this "unbalance" because it easy for the network to compress information but harder to decompress them. So the decoding part uses a more complex model.\par
+The compression factor that defines the lenght of the encoding had been decided with a benchmark: we trained 10 networks with different compression factors (from 20 to 30) and analyzed their mean squared errors (\emph{MSE}) when trying to reproduce the input. Figure \ref{fig:multiacc} and \ref{fig:mse} demonstrates that the best compression factor was $28$, that is having an encoded layer formed by 39 neurons. This result depends more on the architecture of the network rather than the problem itsel, but it is noticeable and not so expected that the plot in Figure \ref{fig:mse} does not represent a monotonic function nor an increasing function.\par
 
 
 
@@ -325,11 +325,11 @@ The compression factor that defines the length of the encoding had been decided 
 \end{figure}
 
 
-Figure \ref{fig:auto} shows the final architecture of the autoencoder: $1\,092$ neurons for input, 256 and 128 for encoding, 39 for storing the compressed knowledge, 128, 256 and 512 for decompression and $1\,092$ for output.\par
+Figure \ref{fig:auto} shows the final architecuture of the autoencoder: $1\,092$ neurons for input, 256 and 128 for encoding, 39 for storing the compressed knowledge, 128, 256 and 512 for decompression and $1\,092$ for output.\par
 All the layers used \texttt{LeakyReLU} with $\alpha=0.01$ as activation function. The output layer used a \emph{Sigmoid} that better represents values between 0 and 1.
 
 \subsection{Training}\label{sec:autotrain}
-For the training phase we used \emph{Adam} but with \emph{binary cross-entropy} loss function. \emph{Binary cross-entropy}, based on the logarithmic operation, 
+For the training phase we used \emph{Adam} but with \emph{binary crossentropy} loss function. \emph{Binary crossentropy}, based on the logarithmic operation, 
 better avoids the effects present in the \emph{Sigmoid} function, that is based on the exponential function.
 
 \begin{figure}[ht!]
@@ -388,7 +388,7 @@ Some digits are distinguishable (like 38, 33, 40, 43 and 45) but they are blurry
 \label{fig:enco}
 \end{figure}
 
-Because results were not exhaustive, we analyzed the distribution in the encoded layer after having fed the network with the entire
+Because results were not exhaustive, we andalyzed the distribution in the encoded layer after having fed the network with the entire
 test set. Figure \ref{fig:enco} demonstrate that the distribution is far from being uniform.
 
 
@@ -478,16 +478,16 @@ Even if the results is not as good as the regularized model's ones, the experime
 
 \section{Implementations}
 The training of the unregularized model can be started with \texttt{noreg-training.py}. It generates the needed images for the project in \texttt{./images/noreg/}
-a model checkpoint (hdf5 file) in in \texttt{./noreg}. The validation can be performed with \texttt{noreg-eval.py}.\par
+a model checkpoint (hdf5 file) in in \texttt{./noreg}. The validation can be performend with \texttt{noreg-eval.py}.\par
 The training of the regularized model can be started with \texttt{reg-training.py}. It generates the needed images for the project in \texttt{./images/reg/}
-a model checkpoint (hdf5 file) in in \texttt{./reg}. The validation can be performed with \texttt{reg-eval.py}.\par
+a model checkpoint (hdf5 file) in in \texttt{./reg}. The validation can be performend with \texttt{reg-eval.py}.\par
 Training, reconstruction and generation of new samples via autoencoder can be started with \texttt{generate.py} \par
 Training and validation of the hybrid model can be started with \texttt{svm.py}
 
 
 \section{Conclusions}
-In this work we trained a FFNN on a custom MNIST dataset without any regularization technique and compared the same FFNN with dropout and early stopping techniques. We found out that the second one performed better during both training and test phase; regularization techniques are a powerful tool that
-prevents overfitting even without changing the overall architecture. We tried also data augmentation and \emph{L1}/\emph{L2} penalization but with worse results. \par
+In this work we trained a FFNN on a custom MNIST dataset without any regularization technique and compared the same FFNN with dropout and early stopping techniques. We found out that the second one performed better during both training and test phase; regularization techniques are a powerfull tool that
+prevents overfitting even without changing the overall architecture. We tried also data augmentation and \emph{L1}/\emph{L2} penalizations but with worse results. \par
 The constraint of $100\,000$ parameters played an important role in the decisions made; without it other form of regularization would have shined and outperformed the unregularized model with a larger gap. \par 
 We build an autoencoder and used its parts to generate new random samples and attach it to a SVM to classify the samples. 
 In the first case we discovered that the generation of new samples cannot be accomplished by using any random distribution and that the model was able to produce meaningful images whose class was not part of the training dataset; in the second case we demonstrated that hybrid architectures can give good results, although the FFNN with regularization gave the best results. 
