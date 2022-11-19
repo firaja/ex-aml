@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""assignment2.py: Solution to the second assignment (no regularization)."""
+"""svm.py: Solution to the second assignment (encoder + SVM)."""
 __author__      = "David Bertoldi"
 
 
@@ -59,20 +59,19 @@ def load_data():
 def build_autoencoder(input_shape, encoding_dim, activation, dropout, regularizer):
 	input_ = Input(shape=input_shape)
 
-	#downsampling_hidden_1 = Dense(512, activation = activation, name = "downsampling_hidden_1")(input_)
-	downsampling_hidden_2 = Dense(256, activation = activation, kernel_regularizer=regularizer, name = "downsampling_hidden_2")(input_)
-	d1 = Dropout(dropout)(downsampling_hidden_2)
-	downsampling_hidden_3 = Dense(128, activation = activation, kernel_regularizer=regularizer, name = "downsampling_hidden_3")(d1)
+	encoder_1 = Dense(256, activation = activation, kernel_regularizer=regularizer, name = "downsampling_hidden_2")(input_)
+	d1 = Dropout(dropout)(encoder_1)
+	encoder_hidden_2 = Dense(128, activation = activation, kernel_regularizer=regularizer, name = "downsampling_hidden_3")(d1)
 
-	encoded = Dense(encoding_dim, activation=activation, kernel_regularizer=regularizer, name = "latent")(downsampling_hidden_3)
+	encoded = Dense(encoding_dim, activation=activation, kernel_regularizer=regularizer, name = "latent")(encoder_hidden_2)
 
-	upsampling_hidden_1 = Dense(128, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_1")(encoded)
-	d2 = Dropout(dropout)(upsampling_hidden_1)
-	upsampling_hidden_2 = Dense(256, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_2")(d2)
-	d3 = Dropout(dropout)(upsampling_hidden_2)
-	upsampling_hidden_3 = Dense(512, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_3")(d3)
+	decoder_1 = Dense(128, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_1")(encoded)
+	d2 = Dropout(dropout)(decoder_1)
+	decoder_2 = Dense(256, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_2")(d2)
+	d3 = Dropout(dropout)(decoder_2)
+	decoder_3 = Dense(512, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_3")(d3)
 	
-	decoded = Dense(28*39, activation='sigmoid', name = "decoder")(upsampling_hidden_3)
+	decoded = Dense(28*39, activation='sigmoid', name = "decoder")(decoder_3)
 
 	autoencoder = Model(input_, decoded)
 
@@ -94,8 +93,6 @@ def start():
 	X_val = X_val.astype('float32') / 255.
 	X_test = X_test.astype('float32') / 255.
 
-	print(X_test[0].shape)
-
 	#flattening 
 	X_train = X_train.reshape((X_train.shape[0], np.prod(X_train.shape[1:])))
 	X_val = X_val.reshape((X_val.shape[0], np.prod(X_val.shape[1:])))
@@ -106,32 +103,28 @@ def start():
 	Y_val = np_utils.to_categorical(y_val-1)
 	Y_test = np_utils.to_categorical(y_test-1)
 
-
 	input_dims = np.prod(X_test.shape[1:]) #784
 	nb_classes = Y_train.shape[1]
 
 
-
-
-	
-	activation = 'sigmoid'#(alpha=0.1)
+	# configurations
+	activation = 'sigmoid'
 	optimizer = Adam(lr=0.01)
-	regularizer = None#L2(1e-05)
+	regularizer = None
 	initializer = HeNormal(seed=SEED)
 	loss = 'binary_crossentropy'
 	dropout = 0.0
-
 	latent_size = 28*39//28
+	e = 1
+	bs = 512
 
-
+	# model definition
 	input_, encoded, decoded, autoencoder = build_autoencoder((input_dims,), latent_size, activation, dropout, regularizer)
 	autoencoder.compile(optimizer=optimizer, loss=loss, metrics=['mse'])
 
 
-	e = 50
-	bs = 512
 
-
+	# training
 	history = autoencoder.fit(X_train,X_train,
 						epochs=e, 
 						batch_size=bs, 
@@ -139,72 +132,12 @@ def start():
 						callbacks = [])
 
 
-	
+	# make predictions
 	X_train_encoded = Model(input_, encoded).predict(X_train)
 	X_test_encoded = Model(input_, encoded).predict(X_test)
 
 
-#	acc = []
-#	acc_tr = []
-#	coefficient = []
-#	for c in [0.0001, 0.001, 0.01, 0.1,1,10, 100, 1000, 10000]:
-#		print(c)
-#		svm = SVC(C=c)
-#		svm.fit(X_train_encoded, y_train[:1000]-1)
-#		#coef = svm.coef_.
-#
-#		p_tr = svm.predict(X_train_encoded)
-#		a_tr = accuracy_score(y_train[:1000], p_tr+1)
-#
-#		
-#
-#		pred = svm.predict(X_test_encoded)
-#		a = accuracy_score(y_test[:1000], pred+1)
-#
-#		
-#
-#		#coefficient.append(coef)
-#		acc_tr.append(a_tr)
-#		acc.append(a)
-#
-#	c = [0.0001, 0.001, 0.01, 0.1,1, 10, 100, 1000, 10000]
-#
-#	plt.subplots(figsize=(10, 5))
-#	plt.semilogx(c, acc,'-gD' ,color='red' , label="Testing Accuracy")
-#	plt.semilogx(c, acc_tr,'-gD' , label="Training Accuracy")
-#	#plt.xticks(L,L)
-#	plt.grid(True)
-#	plt.xlabel("Cost Parameter C")
-#	plt.ylabel("Accuracy")
-#	plt.legend()
-#	plt.title('Accuracy versus the Cost Parameter C (log-scale)')
-#	plt.show()
-
-
-
-	svm = SVC(C=1)
-	svm.fit(X_train_encoded, y_train-1)
-
-	pred = svm.predict(X_test_encoded)
-
-	print(accuracy_score(y_test, pred+1))
-
-
-	viridis = matplotlib.cm.get_cmap('viridis_r', 330)
-	newcolors = viridis(np.linspace(0, 1, 330))
-	white = np.array([1, 1, 1, 1])
-	newcolors[:10, :] = white
-	newcmp = ListedColormap(newcolors)
-
-
-	cm = confusion_matrix(y_test, pred+1)
-	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20), colorbar=True, cmap=newcmp)
-	plt.xticks(np.arange(50), np.arange(1, 51))
-	plt.yticks(np.arange(50), np.arange(1, 51))
-	plt.show()
-
-
-
+	# test
 	svm = SVC(C=10)
 	svm.fit(X_train_encoded, y_train-1)
 
@@ -213,30 +146,20 @@ def start():
 	print(accuracy_score(y_test, pred+1))
 
 
+	# confusion matrix
 	viridis = matplotlib.cm.get_cmap('viridis_r', 330)
 	newcolors = viridis(np.linspace(0, 1, 330))
 	white = np.array([1, 1, 1, 1])
 	newcolors[:10, :] = white
 	newcmp = ListedColormap(newcolors)
 
-
+	
 	cm = confusion_matrix(y_test, pred+1)
 	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20), colorbar=True, cmap=newcmp)
 	plt.xticks(np.arange(50), np.arange(1, 51))
 	plt.yticks(np.arange(50), np.arange(1, 51))
 	plt.show()
 	
-
-
-
-def format(s, activation, regularizer, loss, optimizer, e, bs, dropout):
-	return s.format(activation if isinstance(activation, str) else type(activation).__name__, 
-					type(regularizer).__name__, 
-					loss, 
-					type(optimizer).__name__, 
-					e, 
-					bs, 
-					dropout)
 
 
 if __name__ == '__main__':

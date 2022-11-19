@@ -54,20 +54,19 @@ def load_data():
 def build_autoencoder(input_shape, encoding_dim, activation, dropout, regularizer):
 	input_ = Input(shape=input_shape)
 
-	#downsampling_hidden_1 = Dense(512, activation = activation, name = "downsampling_hidden_1")(input_)
-	downsampling_hidden_2 = Dense(256, activation = activation, kernel_regularizer=regularizer, name = "downsampling_hidden_2")(input_)
-	d1 = Dropout(dropout)(downsampling_hidden_2)
-	downsampling_hidden_3 = Dense(128, activation = activation, kernel_regularizer=regularizer, name = "downsampling_hidden_3")(d1)
+	encoder_1 = Dense(256, activation = activation, kernel_regularizer=regularizer, name = "downsampling_hidden_2")(input_)
+	d1 = Dropout(dropout)(encoder_1)
+	encoder_hidden_2 = Dense(128, activation = activation, kernel_regularizer=regularizer, name = "downsampling_hidden_3")(d1)
 
-	encoded = Dense(encoding_dim, activation=activation, kernel_regularizer=regularizer, name = "latent")(downsampling_hidden_3)
+	encoded = Dense(encoding_dim, activation=activation, kernel_regularizer=regularizer, name = "latent")(encoder_hidden_2)
 
-	upsampling_hidden_1 = Dense(128, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_1")(encoded)
-	d2 = Dropout(dropout)(upsampling_hidden_1)
-	upsampling_hidden_2 = Dense(256, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_2")(d2)
-	d3 = Dropout(dropout)(upsampling_hidden_2)
-	upsampling_hidden_3 = Dense(512, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_3")(d3)
+	decoder_1 = Dense(128, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_1")(encoded)
+	d2 = Dropout(dropout)(decoder_1)
+	decoder_2 = Dense(256, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_2")(d2)
+	d3 = Dropout(dropout)(decoder_2)
+	decoder_3 = Dense(512, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_3")(d3)
 	
-	decoded = Dense(28*39, activation='sigmoid', name = "decoder")(upsampling_hidden_3)
+	decoded = Dense(28*39, activation='sigmoid', name = "decoder")(decoder_3)
 
 	autoencoder = Model(input_, decoded)
 
@@ -150,10 +149,7 @@ def start():
 
 
 
-	#plt.hist(encoded_imgs.ravel(), bins=54, rwidth=0.8)
-	#plt.show()
-
-	
+	# reconstruction from input	
 	n = 20 
 	plt.figure(figsize=(100, 100))
 	for i in range(n):
@@ -172,14 +168,30 @@ def start():
 		ax.get_yaxis().set_visible(False)
 	plt.show()
 	
-	c = Counter(as_list)
+	
+	
+	
+	
+
+	# encoded layer: analysis of distribution
+	m = []
+	s = []
+	for i in range(encoded_imgs.shape[1]):
+		column = encoded_imgs[:, i]
+		mean = np.mean(column)
+		stdev = np.std(column)
+		m.append(mean)
+		s.append(stdev)
+
+	plt.bar(range(encoded_imgs.shape[1]), m, yerr=s, capsize = 4)
+	plt.xlabel('Position') 
+	plt.ylabel('Value (mean and st. dev.)') 
+	plt.show()
+
+
+	# generate new data from custom distribution
 	n = 20
-	news = []
-	#for x in range(n):
-	#	news.append(random.choices(list(c.keys()), weights=list(c.values()), k=latent_size))
-
-	#news = encoded_imgs
-
+	custom_dist = []
 	for _ in range(n):
 		k = []
 		for i in range(encoded_imgs.shape[1]):
@@ -187,15 +199,14 @@ def start():
 			mean = np.mean(column)
 			stdev = np.std(column)
 			k.append(random.gauss(mean, stdev))
-		news.append(k)
+		custom_dist.append(k)
 
-	news = np.array(news)
+	custom_dist = np.array(custom_dist)
+	output = Model(encoded, decoded).predict(custom_dist)
 	
-	output = Model(encoded, decoded).predict(news)
-	
 
 
-
+	# plot generated output
 	fig, ax = plt.subplots(2,5)
 	ax = ax.flatten()
 	for i in range(10):
@@ -205,7 +216,7 @@ def start():
 		ax[i].imshow(plottable_image)
 	plt.show()
 	
-	
+	# use uniform distribution to generate new samples
 	random_encodings = np.random.rand(20,latent_size)
 	output = Model(encoded, decoded).predict(random_encodings)
 	fig, ax = plt.subplots(2,5)
@@ -218,14 +229,6 @@ def start():
 	plt.show()
 
 
-def format(s, activation, regularizer, loss, optimizer, e, bs, dropout):
-	return s.format(activation if isinstance(activation, str) else type(activation).__name__, 
-					type(regularizer).__name__, 
-					loss, 
-					type(optimizer).__name__, 
-					e, 
-					bs, 
-					dropout)
 
 
 if __name__ == '__main__':

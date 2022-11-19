@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""assignment2.py: Solution to the second assignment."""
+"""reg-training.py: Solution to the second assignment (regularized model)."""
 __author__      = "David Bertoldi"
 
 
@@ -84,23 +84,6 @@ def augment_data(X_train, y_train, n):
 		y_res = np.append(y_res, [k]*len(results))
 		X_res = np.append(X_res, results, axis=0)
 
-#		print('Elaborating {}: from {} to {}'.format(k, cnt[k], len(samples)+len(results)))
-
-
-#	for i in range(X_train.shape[0]):
-#		plt.imshow(X_train[i])
-#		plt.show()
-#		X_res[i] = add_noise(X_train[i])
-#		plt.imshow(X_res[i])
-#		plt.show()
-
-	
-#	for i, (img, label) in enumerate(zip(X_train, y_train)):
-#		if random.randint(1, 20) == 1: 
-#			picked = random.randint(0, X_res.shape[0])
-#			X_res = np.append(X_res, np.array([shift_image(X_res[picked], [-2,0,2][random.randrange(3)], [-2,0,2][random.randrange(3)])]),  axis=0)
-#			y_res = np.append(y_res, label)
-
 
 	return X_res, y_res
 
@@ -134,11 +117,7 @@ def get_samples(num, X_train, y_train):
 
 
 def shift_image(image, dx, dy):
-#	plt.imshow(image)
-#	plt.show()
 	image = shift(image, [dy, dx], cval=0, mode="constant")
-#	plt.imshow(image)
-#	plt.show()
 	return image
 
 
@@ -146,17 +125,14 @@ def shift_image(image, dx, dy):
 def start():
 	X_train, y_train, X_test, y_test = load_data()
 
-	
-
-	num_of_lables = len(set(np.concatenate((y_train, y_test))))
 
 	# Separate the test data
 	X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.15, random_state=SEED, shuffle=True, stratify = None)
 
-	
-
-	#X_train, y_train = augment_data(X_train, y_train, num_of_lables)
-	#X_train, y_train = shuffle(X_train, y_train, random_state=SEED)
+	# data augmentation (disabled)
+	# num_of_lables = len(set(np.concatenate((y_train, y_test))))
+	# X_train, y_train = augment_data(X_train, y_train, num_of_lables)
+	# X_train, y_train = shuffle(X_train, y_train, random_state=SEED)
 	
 	
 
@@ -173,7 +149,6 @@ def start():
 	X_val = X_val.reshape((X_val.shape[0], np.prod(X_val.shape[1:])))
 	X_test = X_test.reshape((X_test.shape[0], np.prod(X_test.shape[1:])))
 
-	selected_labels = range(num_of_lables)
 
 	#one-hot encoding
 	Y_train = np_utils.to_categorical(y_train-1)
@@ -187,19 +162,22 @@ def start():
 
 
 
-	
+	# configurations
 	activation = LeakyReLU(alpha=0.01)
 	optimizer = Adam(learning_rate=1e-03)
-	regularizer = None#L2(1e-05)
+	regularizer = None
 	initializer = HeNormal(seed=SEED)
 	loss = 'categorical_crossentropy'
 	dropout = 0.1
+	e = 50
+	bs = 256
 
 
+	# model definition
 	model = build_model((input_dims,), nb_classes, activation, initializer, regularizer, dropout)
-
 	model.compile(optimizer=optimizer, loss=loss, metrics=['categorical_accuracy'])
 	model.summary()
+
 
 	# Checkpoints
 	mcp_save_acc = ModelCheckpoint('./reg/acc2.hdf5',
@@ -211,6 +189,7 @@ def start():
 									monitor='val_loss', 
 									mode='min')
 
+	# early stopping
 	early_stopping = EarlyStopping(monitor='val_categorical_accuracy', 
 									patience=10, 
 									min_delta=0.005, 
@@ -218,17 +197,16 @@ def start():
 									restore_best_weights=True,
 									verbose=1)
 
-	e = 50
-	bs = 256
+	
 
-
+	# trainig
 	history = model.fit(X_train,Y_train,
 						epochs=e, 
 						batch_size=bs, 
 						validation_data = (X_val, Y_val), 
 						callbacks = [mcp_save_acc, mcp_save_loss, early_stopping])
 
-	# Plot training & validation accuracy values
+	# plot training & validation accuracy values
 	plt.plot(history.history['categorical_accuracy'])
 	plt.plot(history.history['val_categorical_accuracy'])
 	plt.title('Model accuracy')
@@ -239,7 +217,7 @@ def start():
 
 	plt.clf()
 
-	# Plot training & validation loss values
+	# plot training & validation loss values
 	plt.plot(history.history['loss'])
 	plt.plot(history.history['val_loss'])
 	plt.title('Model loss')

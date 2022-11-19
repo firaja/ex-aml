@@ -86,11 +86,11 @@ def start():
 	seen = []
 	i = 1
 	while i < columns*rows + 1:
-		k = [17, 106, 136, 242, 272, 280][i-1] +0
+		k = [17, 3, 136, 242, 272, 280][i-1] +0
 		img = X_train[k]
 		ax = fig.add_subplot(rows, columns, i)
 		plt.axis('off')
-		ax.set_title('Number ' + str(y_train[k]), fontsize=30)
+		ax.set_title('Number ' + str(y_train[k]), fontsize=40)
 		plt.imshow(img, cmap='gray')
 		i += 1
 	plt.show()

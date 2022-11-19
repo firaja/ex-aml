@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""assignment2.py: Solution to the second assignment (no regularization)."""
+"""assignment2.py: Solution to the second assignment (autoencoder)."""
 __author__      = "David Bertoldi"
 
 
@@ -49,26 +49,28 @@ def load_data():
 
 
 
-def build_autoencoder(input_shape, encoding_dim, activation):
-	input = Input(shape=input_shape)
+def build_autoencoder(input_shape, encoding_dim, activation, dropout, regularizer):
+	input_ = Input(shape=input_shape)
 
-	#downsampling_hidden_1 = Dense(512, activation = activation, name = "downsampling_hidden_1")(input)
-	downsampling_hidden_2 = Dense(256, activation = activation, name = "downsampling_hidden_2")(input)
-	downsampling_hidden_3 = Dense(128, activation = activation, name = "downsampling_hidden_3")(downsampling_hidden_2)
+	encoder_1 = Dense(256, activation = activation, kernel_regularizer=regularizer, name = "downsampling_hidden_2")(input_)
+	d1 = Dropout(dropout)(encoder_1)
+	encoder_hidden_2 = Dense(128, activation = activation, kernel_regularizer=regularizer, name = "downsampling_hidden_3")(d1)
 
-	encoded = Dense(encoding_dim, activation=activation, name = "latent")(downsampling_hidden_3)
+	encoded = Dense(encoding_dim, activation=activation, kernel_regularizer=regularizer, name = "latent")(encoder_hidden_2)
 
-	upsampling_hidden_1 = Dense(128, activation = activation, name = "upsampling_hidden_1")(encoded)
-	upsampling_hidden_2 = Dense(256, activation = activation, name = "upsampling_hidden_2")(upsampling_hidden_1)
-	upsampling_hidden_3 = Dense(512, activation = activation, name = "upsampling_hidden_3")(upsampling_hidden_2)
+	decoder_1 = Dense(128, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_1")(encoded)
+	d2 = Dropout(dropout)(decoder_1)
+	decoder_2 = Dense(256, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_2")(d2)
+	d3 = Dropout(dropout)(decoder_2)
+	decoder_3 = Dense(512, activation = activation, kernel_regularizer=regularizer, name = "upsampling_hidden_3")(d3)
 	
-	decoded = Dense(28*39, activation='sigmoid', name = "decoder")(upsampling_hidden_3)
+	decoded = Dense(28*39, activation='sigmoid', name = "decoder")(decoder_3)
 
-	autoencoder = Model(input, decoded)
+	autoencoder = Model(input_, decoded)
 
 	autoencoder.summary()
 
-	return encoded, decoded, autoencoder
+	return input_, encoded, decoded, autoencoder
 
 
 def start():
@@ -102,37 +104,16 @@ def start():
 
 
 
-	
-	activation = 'sigmoid'#LeakyReLU(alpha=0.01)
+	# configurations
+	activation = 'sigmoid'
 	optimizer = Adam(learning_rate=1e-03)
-	regularizer = None#L2(1e-03)
+	regularizer = None
 	initializer = HeNormal(seed=SEED)
 	loss = 'binary_crossentropy'
 	dropout = 0.1
 
 	
 
-
-	d = {}
-
-
-	
-
-	latent_size = 28*39//28
-
-	encoded, decoded, autoencoder = build_autoencoder((input_dims,), latent_size, activation)
-	autoencoder.compile(optimizer=optimizer, loss=loss, metrics=['mse'])
-
-
-	e = 50
-	bs = 512
-
-
-	history = autoencoder.fit(X_train,X_train,
-						epochs=e, 
-						batch_size=bs, 
-						validation_data = (X_val, X_val), 
-						callbacks = [])
 
 
 
@@ -143,7 +124,7 @@ def start():
 	plt.ylabel('MSE')
 	plt.xlabel('Epoch')
 	plt.legend(['Train', 'Test'], loc='upper left')
-	plt.savefig('./images/auto/accuracy.png')
+	#plt.savefig('./images/auto/accuracy.png')
 
 	plt.clf()
 
@@ -154,7 +135,7 @@ def start():
 	plt.ylabel('Loss')
 	plt.xlabel('Epoch')
 	plt.legend(['Train', 'Test'], loc='upper right')
-	plt.savefig('./images/auto/loss.png')
+	#plt.savefig('./images/auto/loss.png')
 
 
 

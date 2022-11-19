@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""assignment2.py: Solution to the second assignment (no regularization)."""
+"""noreg-eval.py: Solution to the second assignment (no regularization)."""
 __author__      = "David Bertoldi"
 
 
@@ -25,6 +25,11 @@ from keras.utils import np_utils
 from tensorflow.keras.regularizers import L1, L2
 from tensorflow.keras.optimizers import Adam, Nadam, SGD
 from tensorflow.keras.initializers import HeNormal, HeUniform
+from mlxtend.plotting import plot_confusion_matrix
+from sklearn.metrics import confusion_matrix
+import matplotlib
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+
 
 
 
@@ -56,8 +61,6 @@ def start():
 	X_train, y_train, X_test, y_test = load_data()
 
 
-	num_of_lables = len(set(np.concatenate((y_train, y_test))))
-
 	# Separate the test data
 	X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.20, random_state=SEED, shuffle=True, stratify = None)
 
@@ -73,7 +76,6 @@ def start():
 	X_val = X_val.reshape((X_val.shape[0], np.prod(X_val.shape[1:])))
 	X_test = X_test.reshape((X_test.shape[0], np.prod(X_test.shape[1:])))
 
-	selected_labels = range(num_of_lables)
 
 	#one-hot encoding
 	Y_train = np_utils.to_categorical(y_train-1)
@@ -87,65 +89,53 @@ def start():
 
 
 
-	
-	activation = 'sigmoid'#LeakyReLU(alpha=0.01)
+	# configurations
+	activation = 'sigmoid'
 	optimizer = Adam(learning_rate=1e-03)
 	initializer = HeNormal(seed=SEED)
 	loss = 'categorical_crossentropy'
 
 
+	
 
+	activation = 'sigmoid'
+	optimizer = Adam(learning_rate=1e-03)
+	initializer = HeNormal(seed=SEED)
+	loss = 'categorical_crossentropy'
+
+	# model definition
 	model = build_model((input_dims,), nb_classes, activation, initializer)
-
+	model.load_weights('noreg/acc2.hdf5')
 	model.compile(optimizer=optimizer, loss=loss, metrics=['categorical_accuracy'])
-	model.summary()
-
-	# Checkpoints
-	mcp_save_acc = ModelCheckpoint('./noreg/acc2.hdf5',
-									save_best_only=True,
-									monitor='val_categorical_accuracy', 
-									mode='max')
-	mcp_save_loss = ModelCheckpoint('./noreg/loss2.hdf5',
-									save_best_only=True,
-									monitor='val_loss', 
-									mode='min')
-
-	early_stopping = EarlyStopping(monitor='val_categorical_accuracy', 
-									patience=100, 
-									min_delta=0.005, 
-									mode='max',
-									restore_best_weights=True,
-									verbose=1)
-
-	e = 50
-	bs = 256
 
 
-	history = model.fit(X_train,Y_train, 
-						epochs=e, 
-						batch_size=bs, 
-						validation_data = (X_val, Y_val), 
-						callbacks = [mcp_save_acc, mcp_save_loss])
+	score, acc = model.evaluate(X_test, Y_test,
+                            batch_size=256)
+	print('Test score:', score)
+	print('Test accuracy:', acc)
 
-	# Plot training & validation accuracy values
-	plt.plot(history.history['categorical_accuracy'])
-	plt.plot(history.history['val_categorical_accuracy'])
-	plt.title('Model accuracy')
-	plt.ylabel('Accuracy')
-	plt.xlabel('Epoch')
-	plt.legend(['Train', 'Test'], loc='upper left')
-	plt.savefig(format('./images/noreg/accuracy-{}-{}-{}-{}-{}.png', activation, loss, optimizer, e, bs))
+	# confusion matrices
+	viridis = matplotlib.cm.get_cmap('viridis_r', 330)
+	newcolors = viridis(np.linspace(0, 1, 330))
+	white = np.array([1, 1, 1, 1])
+	newcolors[:10, :] = white
+	newcmp = ListedColormap(newcolors)
 
-	plt.clf()
+	Y_val_pred = model.predict(X_val)
+	y_val_pred = Y_val_pred.argmax(1)
+	cm = confusion_matrix(y_val, y_val_pred+1, labels=range(1,51))
+	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20), colorbar=True, cmap=newcmp)
+	plt.xticks(np.arange(50), np.arange(1, 51))
+	plt.yticks(np.arange(50), np.arange(1, 51))
+	plt.show()
 
-	# Plot training & validation loss values
-	plt.plot(history.history['loss'])
-	plt.plot(history.history['val_loss'])
-	plt.title('Model loss')
-	plt.ylabel('Loss')
-	plt.xlabel('Epoch')
-	plt.legend(['Train', 'Test'], loc='upper right')
-	plt.savefig(format('./images/noreg/loss-{}-{}-{}-{}-{}.png', activation, loss, optimizer, e, bs))
+	Y_test_pred = model.predict(X_test)
+	y_test_pred = Y_test_pred.argmax(1)
+	cm = confusion_matrix(y_test, y_test_pred+1)
+	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20), colorbar=True, cmap=newcmp)
+	plt.xticks(np.arange(50), np.arange(1, 51))
+	plt.yticks(np.arange(50), np.arange(1, 51))
+	plt.show()
 
 
 def format(s, activation, loss, optimizer, e, bs):
