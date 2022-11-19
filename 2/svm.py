@@ -31,6 +31,8 @@ from sklearn.metrics import confusion_matrix
 from collections import Counter
 from sklearn.svm import SVC, LinearSVC
 from sklearn.metrics import accuracy_score
+import matplotlib
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 
 
 
@@ -100,9 +102,9 @@ def start():
 	X_test = X_test.reshape((X_test.shape[0], np.prod(X_test.shape[1:])))
 
 	#one-hot encoding
-	Y_train = np_utils.to_categorical(y_train)
-	Y_val = np_utils.to_categorical(y_val)
-	Y_test = np_utils.to_categorical(y_test)
+	Y_train = np_utils.to_categorical(y_train-1)
+	Y_val = np_utils.to_categorical(y_val-1)
+	Y_test = np_utils.to_categorical(y_test-1)
 
 
 	input_dims = np.prod(X_test.shape[1:]) #784
@@ -112,21 +114,21 @@ def start():
 
 
 	
-	activation = LeakyReLU(alpha=0.1)
+	activation = 'sigmoid'#(alpha=0.1)
 	optimizer = Adam(lr=0.01)
 	regularizer = None#L2(1e-05)
 	initializer = HeNormal(seed=SEED)
 	loss = 'binary_crossentropy'
 	dropout = 0.0
 
-	latent_size = 28*39//20
+	latent_size = 28*39//28
 
 
 	input_, encoded, decoded, autoencoder = build_autoencoder((input_dims,), latent_size, activation, dropout, regularizer)
 	autoencoder.compile(optimizer=optimizer, loss=loss, metrics=['mse'])
 
 
-	e = 20
+	e = 50
 	bs = 512
 
 
@@ -142,17 +144,86 @@ def start():
 	X_test_encoded = Model(input_, encoded).predict(X_test)
 
 
+#	acc = []
+#	acc_tr = []
+#	coefficient = []
+#	for c in [0.0001, 0.001, 0.01, 0.1,1,10, 100, 1000, 10000]:
+#		print(c)
+#		svm = SVC(C=c)
+#		svm.fit(X_train_encoded, y_train[:1000]-1)
+#		#coef = svm.coef_.
+#
+#		p_tr = svm.predict(X_train_encoded)
+#		a_tr = accuracy_score(y_train[:1000], p_tr+1)
+#
+#		
+#
+#		pred = svm.predict(X_test_encoded)
+#		a = accuracy_score(y_test[:1000], pred+1)
+#
+#		
+#
+#		#coefficient.append(coef)
+#		acc_tr.append(a_tr)
+#		acc.append(a)
+#
+#	c = [0.0001, 0.001, 0.01, 0.1,1, 10, 100, 1000, 10000]
+#
+#	plt.subplots(figsize=(10, 5))
+#	plt.semilogx(c, acc,'-gD' ,color='red' , label="Testing Accuracy")
+#	plt.semilogx(c, acc_tr,'-gD' , label="Training Accuracy")
+#	#plt.xticks(L,L)
+#	plt.grid(True)
+#	plt.xlabel("Cost Parameter C")
+#	plt.ylabel("Accuracy")
+#	plt.legend()
+#	plt.title('Accuracy versus the Cost Parameter C (log-scale)')
+#	plt.show()
 
-	svm = SVC()
-	svm.fit(X_train_encoded, y_train)
+
+
+	svm = SVC(C=1)
+	svm.fit(X_train_encoded, y_train-1)
 
 	pred = svm.predict(X_test_encoded)
 
-	print(accuracy_score(y_test, pred))
+	print(accuracy_score(y_test, pred+1))
 
 
-	cm = confusion_matrix(y_test, pred)
-	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20))
+	viridis = matplotlib.cm.get_cmap('viridis_r', 330)
+	newcolors = viridis(np.linspace(0, 1, 330))
+	white = np.array([1, 1, 1, 1])
+	newcolors[:10, :] = white
+	newcmp = ListedColormap(newcolors)
+
+
+	cm = confusion_matrix(y_test, pred+1)
+	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20), colorbar=True, cmap=newcmp)
+	plt.xticks(np.arange(50), np.arange(1, 51))
+	plt.yticks(np.arange(50), np.arange(1, 51))
+	plt.show()
+
+
+
+	svm = SVC(C=10)
+	svm.fit(X_train_encoded, y_train-1)
+
+	pred = svm.predict(X_test_encoded)
+
+	print(accuracy_score(y_test, pred+1))
+
+
+	viridis = matplotlib.cm.get_cmap('viridis_r', 330)
+	newcolors = viridis(np.linspace(0, 1, 330))
+	white = np.array([1, 1, 1, 1])
+	newcolors[:10, :] = white
+	newcmp = ListedColormap(newcolors)
+
+
+	cm = confusion_matrix(y_test, pred+1)
+	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20), colorbar=True, cmap=newcmp)
+	plt.xticks(np.arange(50), np.arange(1, 51))
+	plt.yticks(np.arange(50), np.arange(1, 51))
 	plt.show()
 	
 
