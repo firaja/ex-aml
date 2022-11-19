@@ -190,7 +190,7 @@ def start():
 		news.append(k)
 
 	news = np.array(news)
-	print(news)
+	
 	output = Model(encoded, decoded).predict(news)
 	
 

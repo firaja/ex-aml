@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2022.7.15)  19 NOV 2022 11:48
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2022.7.15)  19 NOV 2022 13:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -743,7 +743,7 @@ File: upzd.fd 2001/06/04 font definitions for U/pzd.
 )
 
 LaTeX Font Warning: Font shape `TU/lmss/bx/sc' undefined
-(Font)              using `TU/lmss/bx/n' instead on input line 35.
+(Font)              using `TU/lmss/bx/n' instead on input line 34.
 
 File: sample.png Graphic file (type bmp)
 <sample.png>
@@ -753,9 +753,6 @@ File: datahist.png Graphic file (type bmp)
 <datahist.png>
 File: unread.png Graphic file (type bmp)
 <unread.png>
-
-Underfull \vbox (badness 1371) has occurred while \output is active []
-
 
 Underfull \hbox (badness 10000) in paragraph at lines 86--89
 []\TU/lmr/m/n/9.53561 Another, technical, issue is that
@@ -815,23 +812,31 @@ File: enco.png Graphic file (type bmp)
  [5]
 File: gen.png Graphic file (type bmp)
 <gen.png>
+ [6]
+File: svm.png Graphic file (type bmp)
+<svm.png>
+File: svmacc.png Graphic file (type bmp)
+<svmacc.png>
+LaTeX Font Info:    Calculating math sizes for size <8.03> on input line 454.
+File: c10.png Graphic file (type bmp)
+<c10.png>
 
 
 Package caption Warning: Unused \captionsetup[algorithm2e] on input line 21.
 See the caption package documentation for explanation.
 
-[6] (./report.aux)
+[7] (./report.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 11363 strings out of 481761
- 226338 string characters out of 5935872
+ 11416 strings out of 481761
+ 227125 string characters out of 5935872
  548989 words of memory out of 5000000
- 28129 multiletter control sequences out of 15000+600000
- 546060 words of font info for 133 fonts, out of 8000000 for 9000
+ 28177 multiletter control sequences out of 15000+600000
+ 547997 words of font info for 144 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  50i,16n,66p,545b,513s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on report.pdf (6 pages).
+Output written on report.pdf (7 pages).

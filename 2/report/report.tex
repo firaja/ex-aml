@@ -31,8 +31,8 @@
 \begin{document}
 
 \maketitle 
-
-\section{Inspecting the data}
+\section{Dataset}
+\subsection{Inspecting the data}
 The data provided consinst of a set of grey-scale images containing 2-digits handwrittend numbers.
 The source is a modification of the MNIST dataset: each image is composed by two digits coming from
 the original MNIST that may be overlapped in different intensity. This let expand the dataset from
@@ -78,7 +78,7 @@ arrays $1\times1092$ and rescaled each value in the continuous interval $[0, 1]$
 \end{figure}
 
 
-\section{Preparing the data}
+\subsection{Preparing the data}
 As said in the section before, the dataset is divided into training and test samples. A validation subset is missing and thus
 is retrieved from the training set: $20\%$ of the images are randomly used for validation instead of training (along with their labels). \par
 About labels, we encoded them in one-hot vectors so that the $1$ are set in the index representing the numerical class.
@@ -110,7 +110,7 @@ Figure \ref{fig:noregffnn} shows the architecture of the network used in this se
 \begin{figure}[ht!]
 \centering                                                                        
 \includegraphics[width=2.5in]{noregffnn.png}
-\captionsetup{justification=centering}                                                                                                                                   
+\captionsetup{justification=centering}                                                                                       
 \caption{Architecture of the unregularized network}
 \label{fig:noregffnn}
 \end{figure}
@@ -426,6 +426,55 @@ of each column. That's because the weights in the encoding layer (and in any oth
 
 Figure \ref{fig:gen} shows the results, which are way better than the ones generated with a uniform distribution. We can find sharper shapes, a little bit of more
 diversity in the digits (although there are many $3$s). What is very interesting is the appearance of a $98$, even if the network has been trained on numbers between $1$ and $50$. This suggests that the order of the weights matters but it doesn't describe the order of the digits; that is quite predictable since the layers are densely-connected and every neuron can affect any other neuron of the next layer.
+
+
+\section{Combination of the latent representation with SVMs}
+In this section we built an hybrid architecture with FFNN and a non-linear SVM. The input goest flows into the encoder described in the previous section in order to generate a latent representation. This representation is used to feed a SVM that solves the classification task. 
+\subsection{Architecture}
+The architecture is shown in Figure \ref{fig:svm}. We used the same encoder with the same activation functions and number of neurons per layers. On the other hand,
+we must decide the cost parameter for the SVM. This parameter decides the size of the margin hyperplane (the higher the cost the smaller the margin) and thus make penalize less or more the samples inside the margin. \par
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{svm.png}
+\captionsetup{justification=centering}                                                                                       
+\caption{Architecture of the encoder that feeds the SVM}
+\label{fig:svm}
+\end{figure}
+
+
+In order to decide the cost parameter, we trained the SVM with multiple costs in a logarithmic scale: from $10^{-4}$, to $10^{4}$. We measured the accuracy both with training and test set in order to evaluate the overfitting of the SVM. In order to speedup the process we used only 1000 samples per training since SVM training time grows as $O(f(C,  d \cdot |X^{train}|^2))$ where $f$ is some increasing function, $C$ is the cost parameter and $d$ is the number of features in the training set $X^{train}$.\par
+The output of this procedure is show in  Figure \ref{fig:svmacc}. As we can see the model starts to overfit with cost $C \geq 10$, so we tested the interval $1 \leq C \leq 10$ and the model scored a maximum accuracy of $84,8\%$ with $C=10$ over the entire test set. 
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{svmacc.png}
+\captionsetup{justification=centering}                                                                                       
+\caption{Accuracy vs. cost parameter $C$ (logarithmic scale)}
+\label{fig:svmacc}
+\end{figure}
+
+We tested the model with the entire test set and produced the confusion matrix in Figure \ref{fig:c10}. We can notice that the model is less accurate than the unregularized and regularized model and still maintains their same weakness: the less populated classes suffer higher level of confusion $i.e.$ it still confuses number 50 with 30, 19 with 17 and 34 with 39.
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{c10.png}
+\captionsetup{justification=centering}                                                                                       
+\caption{Confusion matrix of the hybrid model with $C=10$}
+\label{fig:c10}
+\end{figure}
+
+Even if the results is not as good as the regularized model's ones, the experiment was not a complete failure. We demonstrate that is possible to train hybrid ML models with good results; also it doesn't mean that a better integration between a FFNN and other classical ML models doesn't exist. This case study covered only non-linear SVMs.
+
+\section{Conclusions}
+In this work we trained a FFNN on a customer MNIST dataset without any regularization technique and compared the same FFNN with dropout and early stopping techniques. We found out that the second one performed better during both training and test phase; regularization techniques are a powerfull tool that
+prevents overfitting even without changin the overall architecture. We tried also data augmentation and L1/L2 penalizations but with worse results. \par
+We build an autoencoder and used its parts in order to generate new random samples and attach it to a SVM in order to classify the samples. In the first
+case we discovered that the generation of new samples cannot be accomplished by using any random distribution but should and in the second case we demonstrate that
+hybrid architectures can give good results, although the FFNN with regularization gave the best results.
+
 
 \end{document}
 
