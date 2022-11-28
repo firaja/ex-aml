@@ -18,7 +18,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, LabelEncoder
 from sklearn.metrics import confusion_matrix
 from mlxtend.plotting import plot_confusion_matrix
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Activation, LeakyReLU, Input, GaussianNoise, Dropout, Conv2D, MaxPooling2D, Flatten
+from tensorflow.keras.layers import Dense, Activation, LeakyReLU, Input, GaussianNoise, Dropout, Conv2D, MaxPooling2D, AveragePooling2D, Flatten
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.utils import np_utils
@@ -43,10 +43,9 @@ def build_model(input_shape, classes, activation, initializer, regularizer, drop
 	model = Sequential()
 	model.add(Conv2D(8, (3, 3), activation=activation, kernel_initializer=initializer, padding='same', input_shape=input_shape))
 	model.add(Conv2D(8, (3, 3), activation=activation, kernel_initializer=initializer, padding='same'))
-	model.add(MaxPooling2D((2, 2)))
+	model.add(AveragePooling2D((2, 2)))
 	model.add(Conv2D(16, (3, 3), activation=activation, kernel_initializer=initializer, padding='same'))
-	model.add(Conv2D(16, (3, 3), activation=activation, kernel_initializer=initializer, padding='same'))
-	model.add(MaxPooling2D((2, 2)))
+	model.add(AveragePooling2D((2, 2)))
 	model.add(Flatten())
 	model.add(Dropout(dropout))
 	model.add(Dense(classes, activation='softmax'))
