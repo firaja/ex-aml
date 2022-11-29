@@ -59,6 +59,25 @@ def build_model(input_shape, classes, activation, initializer, regularizer, drop
 def start():
 	(X_train, y_train), (X_test, y_test) = tf.keras.datasets.mnist.load_data()
 
+	print(len(y_train), len(y_test))
+
+	num = 10
+	images = X_train[:num]
+	labels = y_train[:num]
+	num_row = 2
+	num_col = 5
+	# plot images
+	fig, axes = plt.subplots(num_row, num_col, figsize=(1.5*num_col,2*num_row))
+	for i in range(num):
+		ax = axes[i//num_col, i%num_col]
+		ax.imshow(images[i], cmap='gray')
+		ax.set_title('Number {}'.format(labels[i]))
+		ax.set_yticklabels([])
+		ax.set_xticklabels([])
+	plt.tight_layout()
+
+	plt.show()
+
 	cnt = Counter()
 	for x in y_train:
 		cnt[x] += 1
