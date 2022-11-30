@@ -103,7 +103,6 @@ The structure continues with another one convolutional layer aligned with the 2D
 \label{tab:count}
 \end{table}
 
-The only regularization used is the \emph{dropout} technique applied to the flattened layer with a rate of $40\%$ and \emph{early stopping} during validation. This allowed the model to not overifit too much and generalize better the problem.
 
 
 \begin{figure}[ht!]
@@ -118,7 +117,36 @@ The only regularization used is the \emph{dropout} technique applied to the flat
 
 
 \subsection{Training}
-The choice of the optimizer was among \emph{SGD} and \emph{Adam}. As expected the first one performed better with small batches (2 to 4) and the second one with batches of $256$ samples, but \emph{Adam} performed better overall, with $+1\%$ on test accuracy. 
+The choice of the optimizer was among \emph{SGD} and \emph{Adam}. As expected the first one performed better with small batches (2 to 4), the second one with batches of $256$ samples; 
+none have shown signs of getting stuck in local minimum regions but \emph{Adam} performed better overall, with $+1\%$ on test accuracy. \par
+
+The only regularization used is the \emph{dropout} technique applied to the flattened layer with a rate of $40\%$ and \emph{early stopping} during validation. This allowed the model to not overifit too much and generalize better the problem. \par
+The behaviour of the model during the training phase is described in the plots of the loss and categorical accuracy in 
+Figure \ref{fig:loss} and Figure \ref{fig:acc}. 
+It easy to find out that the model converges after $14$ epochs and the \emph{early stopping} mechanism stopped the learning process after $24$ epochs (out of maximum of $50$). The \emph{early stopping} had a patience factor of 10 with a minimum $\delta$ of $0.5\%$ in validation accuracy.
+We didn't resumed the model's weight at the $14^{th}$ epoch because the training accuracy was too low ($97.1\%$) compared to the final one ($99\%$).
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{loss.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Loss}
+\label{fig:loss}                                                                                                                               
+\end{figure}
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{acc.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Categorical accuracy}
+\label{fig:acc}                                                                                                                               
+\end{figure}
+
+The validation loss was always lower than the training loss. This is effect is caused by the \emph{dropout} because it penalizes model variance by randomly removing neurons from the flatten layer only during the training; the models underfitted and since \emph{dropout} is disabled during the validation we had lower validation loss. The same for the accuracy, being higher during validation.
+
+
+\subsection{Evaluation}
 
 \end{document}
 
