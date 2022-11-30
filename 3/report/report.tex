@@ -34,7 +34,7 @@
 
 
 \section{Inspecting the data}\label{sec:insp}
-The MNIST dataset contains $70\,000 $images of handwritten digits ($0$ to $9$) that have been size-normalized and centered in a square grid of pixels. Each image is a $28 \times 28$ array of floating-point numbers representing grayscale intensities ranging from $0$ (black) to $255$ (white). \par
+The MNIST dataset contains $70\,000$ images of handwritten digits ($0$ to $9$) that have been size-normalized and centered in a square grid of pixels. Each image is a $28 \times 28$ array of floating-point numbers representing grayscale intensities ranging from $0$ (black) to $255$ (white). \par
 The labels consist of a vector of values, corresponding to the digit classification categories $0$ through $9$. \par
 The dataset is already divided into training and test sets, respectively with $60\,000$ and $10\,000$ samples. \par
 
@@ -78,15 +78,47 @@ The aim of this section is to describe a CNN with less than $10\,000$ parameters
 with high level of accuracy the numbers from the dataset with or without any regularization technique. 
 
 \subsection{The network}
+The CNN presents a typical architecure formed by convolutional layers followed by pooling layers and ending with dense layers. \par
+In particular there are 2 convulutional layers covering the whole $28 \times 28$ matrix, formed by 8 $3 \times 3$ filters, for a total dimension of $28 \times 28 \times 8$. These two layers are followed by a max pooling layer that halves the the widht and height of the outcoming activation map. For this problem we tested both \emph{max pooling} and \emph{average pooling}; the first one performed slighty better ($+0.1\%$ in test accuracy): usually \emph{average pooling} smooths out the image and  the sharp features may be identified with more difficulty, while \emph{max pooling} chooses the white pixels of the image (in case of MNIST dataset, the pixels defining the handwritten digit). Although we noticed a slighty improvement using \emph{max pooling}, the images are too small to actually benefit from the methods' differences.
+The structure continues with another one convolutional layer aligned with the 2D spatiality of the last pooling layer but doubled in the depth, that is $7 \times 7 \times 16$. The convolutional layer is reduced in spatiality by another \emph{max pooling layer} $7 \times 7 \times 16$ and flattened in a 1D array of $784$. The input flows to an output layer activated by \emph{Softmax} function. Figure \ref{fig:cnn} summarizes the entire architecture and Table \ref{tab:count} highlights the number of parameters in each layer.
+
+
+
+\begin{table}[ht!]
+\begin{tabular}{|ll|l|}
+\hline
+\rowcolor[HTML]{3166FF} 
+\multicolumn{1}{|l|}{\cellcolor[HTML]{3166FF}{\color[HTML]{FFFFFF} \textbf{Layer}}} & {\color[HTML]{FFFFFF} \textbf{Size}} & {\color[HTML]{FFFFFF} \textbf{Parameters}} \\ \hline
+\multicolumn{1}{|l|}{input}                                                         & $28\times28\times1$                          &   $0$                                             \\ \hline
+\multicolumn{1}{|l|}{Conv2D-1}                                                      & $28\times28\times8$                           &  $(3\cdot3\cdot1+1)\cdot8 = 80$                                            \\ \hline
+\multicolumn{1}{|l|}{Conv2D-2}                                                      & $28\times28\times8$                            &  $(3\cdot3\cdot8 + 1)\cdot8 = 584$                                            \\ \hline
+\multicolumn{1}{|l|}{MaxPool-1}                                                     & $14\times14\times8$                            &  $0$                                            \\ \hline
+\multicolumn{1}{|l|}{Conv2D-3}                                                      & $14\times14\times16$                            & $(3\cdot3\cdot8 + 1)\cdot16 = 1\,168$                                            \\ \hline
+\multicolumn{1}{|l|}{MaxPool-2}                                                      & $7\times7\times16$                            & $0$                                            \\ \hline
+\multicolumn{1}{|l|}{Flatten}                                                       & $1\times1\times784$                            & $0$                                            \\ \hline
+\multicolumn{1}{|l|}{Dense}                                                         & $1\times1\times10$                            & $(784 + 1)\cdot10 = 7\,850$                                            \\ \hline
+\multicolumn{2}{|l|}{\textbf{Total}}                                                                                       &       $9\,682$                                     \\ \hline
+\end{tabular}
+\caption{Summary of the layers' dimensions and count of the parameters for each layer}
+\label{tab:count}
+\end{table}
+
+The only regularization used is the \emph{dropout} technique applied to the flattened layer with a rate of $40\%$ and \emph{early stopping} during validation. This allowed the model to not overifit too much and generalize better the problem.
+
 
 \begin{figure}[ht!]
 \centering                                                                        
 \includegraphics[width=3.5in]{cnn.png}
 \captionsetup{justification=centering}                                                                                         
-\caption{Histogram of the frequency of samples in the dataset}
+\caption{Architecture of the CNN}
 \label{fig:cnn}                                                                                                                               
 \end{figure}
 
+
+
+
+\subsection{Training}
+The choice of the optimizer was among \emph{SGD} and \emph{Adam}. As expected the first one performed better with small batches (2 to 4) and the second one with batches of $256$ samples, but \emph{Adam} performed better overall, with $+1\%$ on test accuracy. 
 
 \end{document}
 
