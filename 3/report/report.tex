@@ -128,8 +128,7 @@ The only regularization used is the \emph{dropout} technique applied to the flat
 The behaviour of the model during the training phase is described in the plots of the loss and categorical accuracy in 
 Figure \ref{fig:loss} and Figure \ref{fig:acc}. 
 It easy to find out that the model converges after $14$ epochs and the \emph{early stopping} mechanism stopped the learning process after $24$ epochs (out of maximum of $50$). The \emph{early stopping} had a patience factor of 10 with a minimum $\delta$ of $0.5\%$ in validation accuracy.
-We didn't resumed the model's weight at the $14^{th}$ epoch because the training accuracy was too low ($97.17\%$) compared to the final one ($99.01\%$).
-
+We didn't resumed the model's weight at the $14^{th}$ epoch because its training accuracy ($98.01\%$) wasn't too distant from the final one ($98.44\%$) and gave the possibility to the validation accuracy to raise from $97.82\%$ to $98.98\%$.
 \begin{figure}[ht!]
 \centering                                                                        
 \includegraphics[width=3.5in]{loss.png}
@@ -148,19 +147,24 @@ We didn't resumed the model's weight at the $14^{th}$ epoch because the training
 \end{figure}
 
 The validation loss was always lower than the training loss. This is effect is caused by the \emph{dropout} because it penalizes model variance by randomly removing neurons from the flatten layer only during the training; the models underfitted and since \emph{dropout} is disabled during the validation we had lower validation loss. The same for the accuracy, being higher during validation.\par
-The best validation accuracy reached was $98.98\%$ using \emph{Adam} with learning rate of $0.01$ and batch size of $256$.
+The best validation accuracy reached was $98.98\%$ using \emph{Adam} with learning rate of $10^{-3}$ and batch size of $256$.
 
 
 \subsection{Evaluation}
-We tested 
+We tested the quality of the model's predictions using the provided test dataset, applying very same transormations on the images used for the training.
+The categorical accuracy 
+over the test set reached $98.65\%$ and can be analyzed with the help of the confusion matrix (Figure \ref{fig:cm}). 
 
 \begin{figure}[ht!]
 \centering                                                                        
 \includegraphics[width=3.5in]{cm2.png}
 \captionsetup{justification=centering}                                                                                         
-\caption{Categorical accuracy}
+\caption{Confusion matrix over the test data}
 \label{fig:cm}                                                                                                                               
 \end{figure}
+
+We noticed that the model confused the $2.34\%$ of the $4$s with a $9$: this can be explained by the fact that the two digits have similar forms, in particular when
+the $4$ is written quicky and in its \emph{"closed form"}. Another source of confusion is the $8$ beign confused again with a $9$ ($1\%$ of the cases). Apart from these cases, that have a realitively low impact, the model gave really good results.
 
 
 \end{document}
