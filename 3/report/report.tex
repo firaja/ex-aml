@@ -75,7 +75,8 @@ About labels, we encoded them in one-hot vectors so that the $1$s are set in the
 
 \section{Building the network and training}
 The aim of this section is to describe a CNN with less than $10\,000$ parameters that is able to classify
-with high level of accuracy the numbers from the dataset with or without any regularization technique. 
+with high level of accuracy the numbers from the dataset with or without any regularization technique. Most of the choices were done according to the results
+coming from the training and prediction phases.
 
 \subsection{The network}
 The CNN presents a typical architecure formed by convolutional layers followed by pooling layers and ending with dense layers. \par
@@ -113,6 +114,9 @@ The structure continues with another one convolutional layer aligned with the 2D
 \label{fig:cnn}                                                                                                                               
 \end{figure}
 
+About the convulutional layers, Tensorflow allows to specify the padding: no padding and padding with zeroes. The first one would had reduced the spatiality of each layer by $1$, the second one preserves the dimensions by putting evenly $0$s on the margins. Adding $0$s with this particular dataset is not an issue, because most of the images (if not all of them) do not contain information along the margins.
+We benchmarked the performances of both methods and we noticed that the zero padding performed had an higher validation accuracy of $+0.8\%$.
+
 
 
 
@@ -124,7 +128,7 @@ The only regularization used is the \emph{dropout} technique applied to the flat
 The behaviour of the model during the training phase is described in the plots of the loss and categorical accuracy in 
 Figure \ref{fig:loss} and Figure \ref{fig:acc}. 
 It easy to find out that the model converges after $14$ epochs and the \emph{early stopping} mechanism stopped the learning process after $24$ epochs (out of maximum of $50$). The \emph{early stopping} had a patience factor of 10 with a minimum $\delta$ of $0.5\%$ in validation accuracy.
-We didn't resumed the model's weight at the $14^{th}$ epoch because the training accuracy was too low ($97.1\%$) compared to the final one ($99\%$).
+We didn't resumed the model's weight at the $14^{th}$ epoch because the training accuracy was too low ($97.17\%$) compared to the final one ($99.01\%$).
 
 \begin{figure}[ht!]
 \centering                                                                        
@@ -143,10 +147,21 @@ We didn't resumed the model's weight at the $14^{th}$ epoch because the training
 \label{fig:acc}                                                                                                                               
 \end{figure}
 
-The validation loss was always lower than the training loss. This is effect is caused by the \emph{dropout} because it penalizes model variance by randomly removing neurons from the flatten layer only during the training; the models underfitted and since \emph{dropout} is disabled during the validation we had lower validation loss. The same for the accuracy, being higher during validation.
+The validation loss was always lower than the training loss. This is effect is caused by the \emph{dropout} because it penalizes model variance by randomly removing neurons from the flatten layer only during the training; the models underfitted and since \emph{dropout} is disabled during the validation we had lower validation loss. The same for the accuracy, being higher during validation.\par
+The best validation accuracy reached was $98.98\%$ using \emph{Adam} with learning rate of $0.01$ and batch size of $256$.
 
 
 \subsection{Evaluation}
+We tested 
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{cm2.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Categorical accuracy}
+\label{fig:cm}                                                                                                                               
+\end{figure}
+
 
 \end{document}
 
