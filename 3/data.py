@@ -57,6 +57,27 @@ def build_model(input_shape, classes, activation, initializer, regularizer, drop
 
 
 def start():
+
+
+
+	d = [0.0,    0.1,    0.2,    0.3,    0.4,    0.5,    0.6,    0.7,    0.8,    0.9]
+	r = [0.9903, 0.9885, 0.9857, 0.9831, 0.9797, 0.9757, 0.9700, 0.9612, 0.9431, 0.8944]
+	v = [0.9854, 0.9880, 0.9886, 0.9891, 0.9884, 0.9879, 0.9868, 0.9841, 0.9817, 0.9699]
+	t = [0.9797, 0.9876, 0.9854, 0.9828, 0.9819, 0.9826, 0.9817, 0.9779, 0.9729, 0.9393]
+	fig = plt.figure()
+	ax = fig.add_subplot(1, 1, 1)
+	ax.plot(d, r,linewidth=2 )
+	ax.plot(d, v,linewidth=2)
+	ax.plot(d, t,linewidth=2)
+	#ax.set_yscale('log')
+	plt.ylabel('Accuracy')
+	plt.xlabel('Dropout rate')
+	plt.legend(['Train', 'Validation', 'Test'], loc='lower left')
+	plt.show()
+
+
+
+
 	(X_train, y_train), (X_test, y_test) = tf.keras.datasets.mnist.load_data()
 
 	print(len(y_train), len(y_test))
@@ -76,7 +97,7 @@ def start():
 		ax.set_xticklabels([])
 	plt.tight_layout()
 
-	plt.show()
+	#plt.show()
 
 	cnt = Counter()
 	for x in y_train:
@@ -96,7 +117,7 @@ def start():
 	ax.set(xticks=range(10), xlim=[-1, 10], title='Training and test data distribution')
 	ax.legend()
 
-	plt.show()
+	#plt.show()
 
 
 def format(s, activation, regularizer, loss, optimizer, e, bs, dropout):

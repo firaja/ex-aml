@@ -104,15 +104,6 @@ def start():
                             batch_size=256)
 	print('Test score:', score)
 	print('Test accuracy:', acc)
-
-
-
-	Y_val_pred = model.predict(X_val)
-	y_val_pred = Y_val_pred.argmax(1)
-	cm = confusion_matrix(y_val, y_val_pred)
-	fig, ax = plot_confusion_matrix(conf_mat=cm, figsize=(20,20), colorbar=True, cmap='GnBu')
-	plt.show()
-
 	
 
 	Y_test_pred = model.predict(X_test)

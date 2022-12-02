@@ -75,12 +75,12 @@ About labels, we encoded them in one-hot vectors so that the $1$s are set in the
 
 \section{Building the network and training}
 The aim of this section is to describe a CNN with less than $10\,000$ parameters that is able to classify
-with high level of accuracy the numbers from the dataset with or without any regularization technique. Most of the choices were done according to the results
+with high level of accuracy the numbers from the dataset in $10$ epochs with batches of $128$ samples. Most of the choices were done according to the results
 coming from the training and prediction phases.
 
 \subsection{The network}
 The CNN presents a typical architecure formed by convolutional layers followed by pooling layers and ending with dense layers. \par
-In particular there are 2 convulutional layers covering the whole $28 \times 28$ matrix, formed by 8 $3 \times 3$ filters, for a total dimension of $28 \times 28 \times 8$. These two layers are followed by a max pooling layer that halves the the widht and height of the outcoming activation map. For this problem we tested both \emph{max pooling} and \emph{average pooling}; the first one performed slighty better ($+0.1\%$ in test accuracy): usually \emph{average pooling} smooths out the image and  the sharp features may be identified with more difficulty, while \emph{max pooling} chooses the white pixels of the image (in case of MNIST dataset, the pixels defining the handwritten digit). Although we noticed a slighty improvement using \emph{max pooling}, the images are too small to actually benefit from the methods' differences.
+In particular there are 2 convulutional layers covering the whole $28 \times 28$ matrix, formed by 8 $3 \times 3$ filters, for a total dimension of $28 \times 28 \times 8$. These two layers are followed by a max pooling layer that halves the the widht and height of the outcoming activation map. For this problem we tested both \emph{max pooling} and \emph{average pooling}; the first one performed slighty better ($+0.2\%$ in test accuracy): usually \emph{average pooling} smooths out the image and  the sharp features may be identified with more difficulty, while \emph{max pooling} chooses the white pixels of the image (in case of MNIST dataset, the pixels defining the handwritten digit). Although we noticed a slighty improvement using \emph{max pooling}, the images are too small to actually benefit from the methods' differences.
 The structure continues with another one convolutional layer aligned with the 2D spatiality of the last pooling layer but doubled in the depth, that is $7 \times 7 \times 16$. The convolutional layer is reduced in spatiality by another \emph{max pooling layer} $7 \times 7 \times 16$ and flattened in a 1D array of $784$. The input flows to an output layer activated by \emph{Softmax} function. Figure \ref{fig:cnn} summarizes the entire architecture and Table \ref{tab:count} highlights the number of parameters in each layer.
 
 
@@ -121,14 +121,28 @@ We benchmarked the performances of both methods and we noticed that the zero pad
 
 
 \subsection{Training}
-The choice of the optimizer was among \emph{SGD} and \emph{Adam}. As expected the first one performed better with small batches (2 to 4), the second one with batches of $256$ samples; 
-none have shown signs of getting stuck in local minimum regions but \emph{Adam} performed better overall, with $+1\%$ on test accuracy. \par
+The choice of the optimizer was among \emph{RMSProp} and \emph{Adam}. 
+None of them have shown signs of getting stuck in local minimum regions but \emph{Adam} performed better overall, with $+0.9\%$ on test accuracy. \par
 
-The only regularization used is the \emph{dropout} technique applied to the flattened layer with a rate of $40\%$ and \emph{early stopping} during validation. This allowed the model to not overifit too much and generalize better the problem. \par
+The only regularization used is the \emph{dropout} technique applied to the flattened layer with a rate of $20\%$. This allowed the model to not overifit too much and generalize better the problem. The choice of the probability to remove a neuron is based on the chart in Figure \ref{fig:drop} where we moved the rate
+from $0\%$ to $90\%$ and logged the results for training, validation and test accuracy.
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{drop.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Loss}
+\label{fig:drop}                                                                                                                               
+\end{figure}
+
+Even if the test accuracy reached its maximum with a $10\%$ rate ($98.8\%$), we chose a $20\%$ drop rate in order to make the model underfit a little more without compromising too much the overall accuracy. 
+It is noticeable the fact that the accuracy on unseen data never drops under $95\%$ even with a drop rate of $90\%$.
+\par
+
 The behaviour of the model during the training phase is described in the plots of the loss and categorical accuracy in 
 Figure \ref{fig:loss} and Figure \ref{fig:acc}. 
-It easy to find out that the model converges after $14$ epochs and the \emph{early stopping} mechanism stopped the learning process after $24$ epochs (out of maximum of $50$). The \emph{early stopping} had a patience factor of 10 with a minimum $\delta$ of $0.5\%$ in validation accuracy.
-We didn't resumed the model's weight at the $14^{th}$ epoch because its training accuracy ($98.01\%$) wasn't too distant from the final one ($98.44\%$) and gave the possibility to the validation accuracy to raise from $97.82\%$ to $98.98\%$.
+
 \begin{figure}[ht!]
 \centering                                                                        
 \includegraphics[width=3.5in]{loss.png}
@@ -146,8 +160,9 @@ We didn't resumed the model's weight at the $14^{th}$ epoch because its training
 \label{fig:acc}                                                                                                                               
 \end{figure}
 
+
 The validation loss was always lower than the training loss. This is effect is caused by the \emph{dropout} because it penalizes model variance by randomly removing neurons from the flatten layer only during the training; the models underfitted and since \emph{dropout} is disabled during the validation we had lower validation loss. The same for the accuracy, being higher during validation.\par
-The best validation accuracy reached was $98.98\%$ using \emph{Adam} with learning rate of $10^{-3}$ and batch size of $256$.
+The best training and validation accuracy reached in this configuration were $98.57\%$ and $98.86\%$ respectively, using \emph{Adam} with learning rate of $10^{-3}$.
 
 
 \subsection{Evaluation}

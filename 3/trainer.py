@@ -86,9 +86,9 @@ def start():
 	regularizer = None
 	initializer = HeNormal(seed=SEED)
 	loss = 'categorical_crossentropy'
-	dropout = 0.4
-	e = 50
-	bs = 256
+	dropout = 0.2
+	e = 10
+	bs = 128
 
 
 	
