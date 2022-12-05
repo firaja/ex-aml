@@ -62,7 +62,7 @@ The training population presents a distribution with mean $\mu = 6\,000$ and sta
 \end{figure}
 
 \section{Preparing the data}
-Before training a CNN using this images, encoded in $28\times28$ matrices with values from $0$ to $255$, we rescaled each value in the continuous interval $[0, 1]$ and expanded the dimensionality of the matrix to $1 \times 28 \times 28$. This encoding will be used in every section of this work: small values increase the efficiency in the calculations and \texttt{Conv2D} requires an additional dimension that describes the channel (in this case just one for the grayscale).
+Before training a CNN using this images, encoded in $28\times28$ matrices with values from $0$ to $255$, we rescaled each value in the continuous interval $[0, 1]$ and expanded the dimensionality of the matrix to $1 \times 28 \times 28$. This encoding will be used in every section of this work: small values increase the efficiency in the calculations and \texttt{Conv2D} requires an additional dimension that describes the channels (in this case just one for the grayscale).
 
 
 \subsection{Data split}
@@ -76,7 +76,7 @@ with the highest possible level of test categorical accuracy the numbers from th
 
 \subsection{The network}
 The CNN presents a typical architecure formed by convolutional layers followed by pooling layers and ending with dense layers. \par
-In particular there are 2 convulutional layers covering the whole $28 \times 28$ matrix, formed by 8 $3 \times 3$ filters, for a total dimension of $28 \times 28 \times 8$. These two layers are followed by a \emph{max pooling} layer that halves the the widht and height of the outcoming activation map. For this problem we tested both \emph{max pooling} and \emph{average pooling}; the first one performed slighty better ($+0.2\%$ in test categorical accuracy): usually \emph{average pooling} smooths out the image and has harder times to identify sharp features while \emph{max pooling} chooses only the brightest pixels of the image that are in this case the ones defining the handwritten digit. Although we noticed a slighty improvement using \emph{max pooling}, the images are too small to actually benefit from the methods' differences. \par
+In particular there are 2 convulutional layers covering the whole $28 \times 28$ image, formed by eight $3 \times 3$ filters, for a total dimension of $28 \times 28 \times 8$. These two layers are followed by a \emph{max pooling} layer that halves the the widht and height of the outcoming activation map. For this problem we tested both \emph{max pooling} and \emph{average pooling}; the first one performed slighty better ($+0.2\%$ in test categorical accuracy): usually \emph{average pooling} smooths out the image and has harder times to identify sharp features while \emph{max pooling} chooses only the brightest pixels of the image that are in this case the ones defining the handwritten digit. Although we noticed a slighty improvement using \emph{max pooling}, the images are too small to actually benefit from the methods' differences. \par
 The structure continues with another one convolutional layer aligned with the 2D spatiality of the last pooling layer but doubled in the depth, that is $7 \times 7 \times 16$. The convolutional layer is reduced in spatiality by another \emph{max pooling layer} $7 \times 7 \times 16$ and flattened in a 1D array of $784$. The input flows to the output layer activated by \emph{Softmax} function. Figure \ref{fig:cnn} summarizes the entire architecture and Table \ref{tab:count} highlights the number of parameters in each layer.
 
 
@@ -113,7 +113,7 @@ The structure continues with another one convolutional layer aligned with the 2D
 On the structure, we tried less deeper convolitional layers (starting from $28\times28\times4$ and then scaling to $14\times14\times8$) but the overall categorical accuracy dropped by $0.8\%$.
 
 About the convulutional layers, Tensorflow allows to specify the padding: no padding and padding with zeroes. The first one would had reduced the spatiality of each layer by $1$, the second one preserves the dimensions by putting evenly $0$s on the margins. Adding $0$s with this particular dataset is not an issue, because most of the images (if not all of them) do not contain information along the margins.
-We benchmarked the performances of both methods and we noticed that the zero padding performed had an higher validation categorical accuracy of $+0.3\%$.
+We benchmarked the performances of both methods and we noticed that the zero padding gave an higher validation categorical accuracy of $+0.3\%$.
 
 
 
@@ -184,7 +184,7 @@ a model checkpoint (hdf5 file) in the working directory. The validation can be p
 
 
 \section{Conclusions}
-In this work we trained a CNN with less than $10\,000$ parameters, achieving the best test categorical accuracy with $10$ epochs and $128$ elements per batch. We tested an architecure with two sections containing convolutional and pooling layers and ending with a dense ouput, benchmarking different dimensions and applying different rate of drop out. The CNN requires a significative lower number of parameters compared to a dense FNN, achieving better results. The application of local filters (or kernels) helped the model to better recognize sharp features in the images.
+In this work we trained a CNN with less than $10\,000$ parameters, achieving the best test categorical accuracy with $10$ epochs and $128$ elements per batch. We tested an architecure with two sections containing convolutional and pooling layers and ending with a dense ouput, benchmarking different dimensions and applying different rate of drop out. The CNN requires a significative lower number of parameters compared to a dense FNN, achieving better results. The application of local filters (or kernels) helped the model to better recognize sharp features in the images with a very low number of epochs.
 
 \end{document}
 

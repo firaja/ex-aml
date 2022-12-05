@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""reg-eval.py: Solution to the second assignment (regularization)."""
+"""trainer.py: Solution to the third assignment."""
 __author__      = "David Bertoldi"
 
 
@@ -77,8 +77,6 @@ def start():
 	nb_classes = y_train.shape[1]
 
 
-	print(input_dims)
-
 
 	# configurations
 	activation = LeakyReLU(alpha=0.01)
@@ -128,7 +126,7 @@ def start():
 	# plot training & validation accuracy values
 	plt.plot(history.history['categorical_accuracy'])
 	plt.plot(history.history['val_categorical_accuracy'])
-	#plt.title('Model accuracy')
+	plt.title('Model accuracy')
 	plt.ylabel('Accuracy')
 	plt.xlabel('Epoch')
 	plt.legend(['Train', 'Validation'], loc='upper left')
@@ -139,7 +137,7 @@ def start():
 	# plot training & validation loss values
 	plt.plot(history.history['loss'])
 	plt.plot(history.history['val_loss'])
-	#plt.title('Model loss')
+	plt.title('Model loss')
 	plt.ylabel('Loss')
 	plt.xlabel('Epoch')
 	plt.legend(['Train', 'Validation'], loc='upper right')

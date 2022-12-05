@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""reg-eval.py: Solution to the second assignment (regularization)."""
+"""eval.py: Solution to the third assignment."""
 __author__      = "David Bertoldi"
 
 
@@ -100,12 +100,11 @@ def start():
 	model.compile(optimizer=optimizer, loss=loss, metrics=['categorical_accuracy'])
 
 	
-	score, acc = model.evaluate(X_test, Y_test,
-                            batch_size=256)
+	score, acc = model.evaluate(X_test, Y_test, batch_size=bs)
 	print('Test score:', score)
 	print('Test accuracy:', acc)
 	
-
+	# confusion matrix
 	Y_test_pred = model.predict(X_test)
 	y_test_pred = Y_test_pred.argmax(1)
 	cm = confusion_matrix(y_test, y_test_pred)
