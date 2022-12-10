@@ -1,0 +1,60 @@
+$ python3 trainer-1.py --cut fc1 --c1 100 --c2 5
+
+
+              precision    recall  f1-score   support
+
+    mountain       1.00      1.00      1.00       800
+      street       1.00      1.00      1.00       800
+     glacier       1.00      1.00      1.00       800
+   buildings       1.00      1.00      1.00       800
+         sea       1.00      1.00      1.00       800
+      forest       1.00      1.00      1.00       800
+
+    accuracy                           1.00      4800
+   macro avg       1.00      1.00      1.00      4800
+weighted avg       1.00      1.00      1.00      4800
+
+              precision    recall  f1-score   support
+
+    mountain       0.85      0.89      0.87       289
+      street       0.93      0.93      0.93       300
+     glacier       0.85      0.86      0.86       296
+   buildings       0.93      0.91      0.92       307
+         sea       0.96      0.93      0.95       309
+      forest       0.99      1.00      0.99       299
+
+    accuracy                           0.92      1800
+   macro avg       0.92      0.92      0.92      1800
+weighted avg       0.92      0.92      0.92      1800
+
+
+
+new features shape: (4800, 777)
+
+
+
+              precision    recall  f1-score   support
+
+    mountain       1.00      0.99      0.99       810
+      street       1.00      1.00      1.00       800
+     glacier       0.98      1.00      0.99       789
+   buildings       1.00      1.00      1.00       800
+         sea       1.00      1.00      1.00       801
+      forest       1.00      1.00      1.00       800
+
+    accuracy                           1.00      4800
+   macro avg       1.00      1.00      1.00      4800
+weighted avg       1.00      1.00      1.00      4800
+
+              precision    recall  f1-score   support
+
+    mountain       0.84      0.74      0.78       340
+      street       0.94      0.91      0.92       310
+     glacier       0.86      0.76      0.81       337
+   buildings       0.88      0.92      0.90       288
+         sea       0.72      0.99      0.84       219
+      forest       0.99      0.97      0.98       306
+
+    accuracy                           0.87      1800
+   macro avg       0.87      0.88      0.87      1800
+weighted avg       0.88      0.87      0.87      1800
