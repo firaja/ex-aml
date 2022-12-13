@@ -52,11 +52,15 @@ x100_scale = np.average(x100_scale)
 
 auto = [x1_auto, x10_auto, 0.5, x100_auto]
 
-plt.plot([1, 10, 20,  100], auto, 'r', label="auto") 
-plt.plot([1, 10, 20, 100], [x1_scale, x10_scale, 0.45,  x100_scale], 'b', label="scale")
-plt.legend(loc="lower right")
-plt.xlabel('cost')
-plt.ylabel('score')
-plt.show()
+#plt.plot([1, 10, 20,  100], auto, 'r', label="auto") 
+#plt.plot([1, 10, 20, 100], [x1_scale, x10_scale, 0.45,  x100_scale], 'b', label="scale")
+#plt.legend(loc="lower right")
+#plt.xlabel('cost')
+#plt.ylabel('score')
+#plt.show()
+
+train = (np.average([2191,2271,2404,2512,2274,2382]), np.std([2191,2271,2404,2512,2274,2382]))
+test = (np.average([437, 474, 553,525,510,501]), np.std([437, 474,553,525,510,501]))
 
 
+print(train, test)

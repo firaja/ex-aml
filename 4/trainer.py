@@ -149,7 +149,6 @@ def start():
 	for i, class_name in enumerate(CLASSES):
 		plt.scatter(C1[y_train == i][:1000], C2[y_train == i][:1000], label = class_name, alpha=0.4)
 	plt.legend()
-	plt.title("PCA Projection")
 	plt.show()
 
 	if not args.skip:
