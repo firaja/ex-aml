@@ -9,7 +9,7 @@
 \usepackage{setspace}
 \usepackage{amsfonts}
 %\usepackage{hyperref}
-\graphicspath{ {./images/} }
+\graphicspath{ {../images/} }
 \usepackage{subfig}
 \usepackage{fontspec}
 \usepackage{listings}
@@ -20,7 +20,7 @@
 %\captionsetup[algorithm2e]{font=footnotesize}
 \usepackage[table,xcdraw]{xcolor}
 \usepackage[utf8]{inputenc}
-\title{Assignment: CNN and MNIST}
+\title{Assignment: Transfer Learning on Intel Image Classification}
 \author{David Bertoldi -- 735213 \\ email: d.bertoldi@campus.unimib.it}
 \affil{Department of Informatics, Systems and Communication}
 \affil{University of Milano-Bicocca}
@@ -42,7 +42,7 @@ Figure \ref{fig:data} shows an 10 entries of the training dataset.
 
 \begin{figure}[ht!]
 \centering                                                                        
-\includegraphics[width=2.5in]{data.png}
+\includegraphics[width=2.5in]{../images/samples.png}
 \captionsetup{justification=centering}                                                                                         
 \caption{The first 10 samples of the train dataset}
 \label{fig:data}                                                                                                                               
@@ -55,7 +55,7 @@ The training population presents a distribution with mean $\mu = 6\,000$ and sta
 
 \begin{figure}[ht!]
 \centering                                                                        
-\includegraphics[width=3.5in]{hist.png}
+\includegraphics[width=3.5in]{../images/data.png}
 \captionsetup{justification=centering}                                                                                         
 \caption{Histogram of the frequency of samples in the dataset}
 \label{fig:hist}                                                                                                                               

@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2022.7.15)  10 DEC 2022 18:27
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2022.7.15)  10 DEC 2022 18:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -666,11 +666,14 @@ LaTeX Font Warning: Font shape `TU/lmss/bx/sc' undefined
 
 LaTeX Font Info:    Calculating math sizes for size <9.53561> on input line 37.
 
-File: data.png Graphic file (type bmp)
-<data.png>
-File: hist.png Graphic file (type bmp)
-<hist.png>
-[1
+File: ../images/samples.png Graphic file (type bmp)
+<../images/samples.png>
+File: ../images/data.png Graphic file (type bmp)
+<../images/data.png>
+
+Underfull \vbox (badness 2922) has occurred while \output is active []
+
+ [1
 
 
 ]
@@ -681,9 +684,10 @@ File: drop.png Graphic file (type bmp)
 LaTeX Font Info:    Calculating math sizes for size <8.03> on input line 137.
 File: loss.png Graphic file (type bmp)
 <loss.png>
+
+[2]
 File: acc.png Graphic file (type bmp)
 <acc.png>
- [2]
 File: cm2.png Graphic file (type bmp)
 <cm2.png>
  [3] (./report.aux)
@@ -692,12 +696,12 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 10132 strings out of 481761
- 206285 string characters out of 5935872
- 519078 words of memory out of 5000000
+ 10133 strings out of 481761
+ 206424 string characters out of 5935872
+ 523079 words of memory out of 5000000
  26941 multiletter control sequences out of 15000+600000
  547949 words of font info for 138 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 50i,10n,66p,884b,332s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 50i,10n,66p,882b,332s stack positions out of 5000i,500n,10000p,200000b,80000s
 
 Output written on report.pdf (3 pages).
