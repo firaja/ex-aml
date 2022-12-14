@@ -83,9 +83,39 @@ The $6$ classes are encoded with numbers $0$ to $5$ and Table \ref{tab:encode} s
 
 
 
+\section{The model} 
+The chosen dataset presented similarieties with ImageNet: the $6$ classes of Intel$^\circledR$ Image Classification are scattered and distributed in the $1\,000$ classes of ImageNet. For this reason a pretrained model on ImageNet speeded up the learning process. The chosen model is VGG16, a $16-$layers deep CNN proposed by Karen Simonyan and Andrew Zisserman at the University of Oxford\cite{vgg16}. Figure \ref{fig:vgg16} shows an overview of its architecture.
 
 
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/vgg16.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Architecture of VGG16 with the cuts applied in this work}
+\label{fig:vgg16}                                                                                                                               
+\end{figure}
 
+In this work we proposed different cuts to the network and feeded its outputs to a "classic" machine learning model, a SVM, and benchmark the performance of the hybrid architecture. \par
+
+The chosen cuts were after the first dense layer (\texttt{fc1}), after the fourth pooling layer (\texttt{block4\_pool}) 
+and after the third pooling layer (\texttt{block3\_pool}). The different cuts led to different challenges, such as the high dimensionality of the features.
+
+\begin{table}[]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|l|}
+\hline
+\rowcolor[HTML]{9698ED} 
+{\color[HTML]{FFFFFF} \textbf{Cut}} & {\color[HTML]{FFFFFF} \textbf{Trainable parameters}} & {\color[HTML]{FFFFFF} \textbf{Dimension}} \\ \hline
+\texttt{fc1}                                 & $117\,479\,232$  & $1\times1\times4096=\mathbf{4\,096}$                             \\ \hline
+\texttt{block4\_pool}                        & $7\,635\,264$  & $14\times14\times512 = \mathbf{100\,352}$                      \\ \hline
+\texttt{block3\_pool}                        & $1\,735\,488$  & $28\times28\times256= \mathbf{200\,704}$                         \\ \hline
+\end{tabular}}
+\caption{Number of VGG16's trainable parameters and dimensions of the extracted features at each cutting point}
+\label{tab:dims}
+\end{table}
+
+As the cuts approached the input, the number of trainable parameters decreased exponentially; however the representation of the features will have an increasingly higher dimension. The higher dimensionality affects the training performance of the SVM and a fine tuning on the management of the memory. For this reason we used less samples during the training phase as the dimensionality increased, increasing the risk of underfitting. Table \ref{tab:dims} describe the details of the problem.
 
 \bibliographystyle{ieeetr}
 \bibliography{Bibliography}
@@ -100,7 +130,10 @@ Practice Problem: Intel Scene Classification Challenge \\
 OpenVINO™ documentation \\
 \texttt{https://docs.openvino.ai/latest/index.html}
 
-
+\bibitem{vgg16}
+\emph{Very Deep Convolutional Networks for Large-Scale Image Recognition} \\
+Karen Simonyan, Andrew Zisserman \\
+\texttt{https://doi.org/10.48550/arXiv.1409.1556}
 
 \end{thebibliography}
 
