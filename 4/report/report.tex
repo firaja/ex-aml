@@ -100,6 +100,10 @@ In this work we proposed different cuts to the network and feeded its outputs to
 The chosen cuts were after the first dense layer (\texttt{fc1}), after the fourth pooling layer (\texttt{block4\_pool}) 
 and after the third pooling layer (\texttt{block3\_pool}). The different cuts led to different challenges, such as the high dimensionality of the features.
 
+
+As the cuts approached the input, the number of trainable parameters decreased exponentially; however the representation of the features will have an increasingly higher dimension. The higher dimensionality affects the training performance of the SVM and a fine tuning on the management of the memory. For this reason we used less samples during the training phase as the dimensionality increased, raising the risk of underfitting. Table \ref{tab:dims} describes the numbers of the problems.
+
+
 \begin{table}[]
 \centering
 \resizebox{\columnwidth}{!}{%
@@ -115,7 +119,54 @@ and after the third pooling layer (\texttt{block3\_pool}). The different cuts le
 \label{tab:dims}
 \end{table}
 
-As the cuts approached the input, the number of trainable parameters decreased exponentially; however the representation of the features will have an increasingly higher dimension. The higher dimensionality affects the training performance of the SVM and a fine tuning on the management of the memory. For this reason we used less samples during the training phase as the dimensionality increased, increasing the risk of underfitting. Table \ref{tab:dims} describe the details of the problem.
+\section{First cutting point: \texttt{fc1}}
+Before attaching to the layer \texttt{fc1} the SVM, it is interesting to visualize the features through PCA (Principal Component Analysis): we decreased the number of dimensions of the extracted features from $4\,096$ to $2$ and plotted the graph in Figure \ref{fig:pca1}.
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/pca-1.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Architecture of VGG16 with the cuts applied in this work}
+\label{fig:pca1}                                                                                                                               
+\end{figure}
+
+In the projection through PCA are identifiable some clusters: glaciers and mountains are very similar, the same goes for streets and buildings. This make sense since the picture of the mountains may contain snow or ice and picture of buildings may contain the surrounding street, and viceversa. The seas borders with the glaciers but it does not blend with them. The forests are a separate concepts and it seems to not share anything with the other classes. \par
+Because the cut is very close to the VGG16's original output we expected an high accuracy in classifying the images.
+\subsection{Training of the model attached to SVM}
+Before starting with the training of the hybrid model, we chose the SVM's hyperparameters using \texttt{GridSearchCV} from sklearn. This function does an exhaustive search of the best parameters for the SVM in order to find the best separation hyperplane. The parameters to be chosen were the cost $C \in \{5, 10, 20, 100\}$ and the kernel coefficient $\gamma \in \{scale, auto\}$. This does not assure that it gives back the best configurations on unseen data. As a matter of fact we should had the best results with cost $C=100$ and $\gamma=auto$ (Figure \ref{fig:costs}), but in this case we achieved higher performances on the test dataset with $C=100$ and $\gamma=scale$. So we used \texttt{GridSearchCV} just like a starting point for further manual experimentations.
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/costs.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Model's performance on the training set with different configurations}
+\label{fig:costs}                                                                                                                               
+\end{figure}
+
+An issue when using hybrid models are some incompatabilities between libraries: we started using Tensorflow's \texttt{DirectoryIterator} or \texttt{Dataset} in order to efficiently load the dataset in batches and to not saturate the memory; unfortunately sklearn does not support this kind of data structure and the only feasible solution was to diminuish the number of samples during the training and test phases. With this cutting point we used $1\,000$ images per class when training and $450$ when testing. \par
+The training accuracy reached $100\%$ and Figure \ref{fig:cm1-train} shows the confusion matrix. 
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/cm1-train.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on training dataset (\texttt{fc1})}
+\label{fig:cm1-train}                                                                                                                               
+\end{figure}
+
+The test accuracy reached $92\%$ and Figure \ref{fig:cm1-test} shows the confusion matrix. We can notice a little confusion between mountains and glaciers and between streets and buildings. This results is in accordance with Figure \ref{fig:pca1}.
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/cm1-test.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on test dataset (\texttt{fc1})}
+\label{fig:cm1-test}                                                                                                                               
+\end{figure}
+
+
 
 \bibliographystyle{ieeetr}
 \bibliography{Bibliography}
