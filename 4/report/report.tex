@@ -70,12 +70,12 @@ The $6$ classes are encoded with numbers $0$ to $5$ and Table \ref{tab:encode} s
 \hline
 \rowcolor[HTML]{9698ED} 
 {\color[HTML]{FFFFFF} \textbf{Number}} & {\color[HTML]{FFFFFF} \textbf{Class}} \\ \hline
-0                                      & Building                              \\ \hline
-1                                      & Forest                                \\ \hline
+0                                      & Mountain                              \\ \hline
+1                                      & Street                                \\ \hline
 2                                      & Glacier                               \\ \hline
-3                                      & Mountain                              \\ \hline
+3                                      & Building                              \\ \hline
 4                                      & Sea                                   \\ \hline
-5                                      & Street                                \\ \hline
+5                                      & Forest                                \\ \hline
 \end{tabular}
 \caption{Mapping between numbers and names}
 \label{tab:encode}
@@ -119,7 +119,11 @@ As the cuts approached the input, the number of trainable parameters decreased e
 \label{tab:dims}
 \end{table}
 
-\section{First cutting point: \texttt{fc1}}
+
+
+
+\section{First cutting point: \texttt{fc1}}\label{sec:fc1}
+
 Before attaching to the layer \texttt{fc1} the SVM, it is interesting to visualize the features through PCA (Principal Component Analysis): we decreased the number of dimensions of the extracted features from $4\,096$ to $2$ and plotted the graph in Figure \ref{fig:pca1}.
 
 \begin{figure}[ht!]
@@ -159,7 +163,7 @@ The training accuracy reached $100\%$ and Figure \ref{fig:cm1-train} shows the c
 \label{fig:cm1-train}                                                                                                                               
 \end{figure}
 
-The test accuracy reached $92\%$ and Figure \ref{fig:cm1-test} shows the confusion matrix. We can notice a little confusion between mountains and glaciers and between streets and buildings. This results is in accordance with Figure \ref{fig:pca1}.
+The test accuracy reached $92\%$ and Figure \ref{fig:cm1-test} shows the confusion matrix. We can notice a little confusion between mountains and glaciers and between streets and buildings. This results are in accordance with Figure \ref{fig:pca1}.
 
 
 \begin{figure}[ht!]
@@ -186,7 +190,7 @@ The curve in Figure \ref{fig:var1} quantifies how much of the total $4096-$dimen
 \label{fig:var1}                                                                                                                               
 \end{figure}
 We chose a configuration that could preserve $90\%$ of the variance, \emph{i.e.} $777$ components. This could assure good perfomances while using just $19\%$ of the dimensions.\par
-In this case we found the optimal configuration for SVM $C=5$ and $\gamma=scale$.
+In this case we found the optimal configuration of the SVM with $C=5$ and $\gamma=scale$.
 
 \begin{figure}[ht!]
 \centering                                                                        
@@ -204,6 +208,8 @@ In this case we found the optimal configuration for SVM $C=5$ and $\gamma=scale$
 \caption{Confusion matrix on test dataset \\ (cut at \texttt{fc1} + PCA + SVM($C=5, \gamma=scale$))}
 \label{fig:cm1-pca-test}                                                                                                                               
 \end{figure}
+Figure \ref{fig:cm1-pca-train} and \ref{fig:cm1-pca-test} shows the confusion matrix after training and testing. We can see that there is a slight worsening in training accuracy ($99.9\%$) while test accuracy dropped to $88\%$. We noticed that the model still confused glaciers with mountain and streets with buildings; in addition to them, some of the images of the sea are mistaken for mountains and glaciers. That means the model is affected by more overfitting before applying PCA. \par
+The lower accuracy and higher overfitting are traded off with faster times in training: we measured a speed up of almost $10$ times, reaching $57$ seconds.
 
 
 
@@ -216,12 +222,21 @@ In this case we found the optimal configuration for SVM $C=5$ and $\gamma=scale$
 
 
 
+\section{Second cutting point: \texttt{block4\_pool}}
 
+Like in section \ref{sec:fc1} we repeated the experiment of visualizing the features extracted from layer \texttt{block4\_pool} through PCA and plotted the graph in Figure \ref{fig:pca2}.
 
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/pca-2.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Architecture of VGG16 with the cuts applied in this work}
+\label{fig:pca2}                                                                                                                               
+\end{figure}
 
-
-
-
+This time the sea, glacier and mountain classes collapsed in one cluster. This anticipated that images belonging to these classes could be classified with lower accuracy.
+The cluster of images of forest is the only one that did not collide with any other.
+We also noticed more isolated images being completely misclassified than the previous cut, \emph{e.g.} some images of mountain or sea are predicted as building or street.
 
 
 
