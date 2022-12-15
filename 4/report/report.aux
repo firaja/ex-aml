@@ -1,38 +1,43 @@
 \relax 
-\providecommand\babel@aux[2]{}
 \@nameuse{bbl@beforestart}
 \citation{site1}
 \citation{site2}
 \citation{vgg16}
 \babel@aux{english}{}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Dataset}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Dataset}{1}\protected@file@percent }
 \newlabel{sec:insp}{{1}{1}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces $16$ random entries of the train dataset\relax }}{1}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces $16$ random entries of the train dataset\relax }}{1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:samples}{{1}{1}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces 16 entries of the train dataset\relax }}{1}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces 16 entries of the train dataset\relax }}{1}\protected@file@percent }
 \newlabel{fig:data}{{2}{1}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Mapping between numbers and names\relax }}{1}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Mapping between numbers and names\relax }}{1}\protected@file@percent }
 \newlabel{tab:encode}{{1}{1}}
-\@writefile{toc}{\contentsline {section}{\numberline {2}The model}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}The model}{1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Number of VGG16's trainable parameters and dimensions of the extracted features at each cutting point\relax }}{2}\protected@file@percent }
+\newlabel{tab:dims}{{2}{2}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Architecture of VGG16 with the cuts applied in this work\relax }}{2}\protected@file@percent }
+\newlabel{fig:vgg16}{{3}{2}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}First cutting point: \texttt  {fc1}}{2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Architecture of VGG16 with the cuts applied in this work\relax }}{2}\protected@file@percent }
+\newlabel{fig:pca1}{{4}{2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Extraction of the features and training of the SVM}{2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Model's performance on the training set with different configurations\relax }}{2}\protected@file@percent }
+\newlabel{fig:costs}{{5}{2}}
 \bibstyle{ieeetr}
 \bibdata{Bibliography}
 \bibcite{site1}{1}
 \bibcite{site2}{2}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Number of VGG16's trainable parameters and dimensions of the extracted features at each cutting point\relax }}{2}{}\protected@file@percent }
-\newlabel{tab:dims}{{2}{2}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Architecture of VGG16 with the cuts applied in this work\relax }}{2}{}\protected@file@percent }
-\newlabel{fig:vgg16}{{3}{2}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}First cutting point: \texttt  {fc1}}{2}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Architecture of VGG16 with the cuts applied in this work\relax }}{2}{}\protected@file@percent }
-\newlabel{fig:pca1}{{4}{2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Training of the model attached to SVM}{2}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{References}{2}{}\protected@file@percent }
 \bibcite{vgg16}{3}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Model's performance on the training set with different configurations\relax }}{3}{}\protected@file@percent }
-\newlabel{fig:costs}{{5}{3}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Confusion matrix on training dataset (\texttt  {fc1})\relax }}{3}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Confusion matrix on training dataset   (cut at \texttt  {fc1} + SVM($C=100, \gamma =scale$))\relax }}{3}\protected@file@percent }
 \newlabel{fig:cm1-train}{{6}{3}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Confusion matrix on test dataset (\texttt  {fc1})\relax }}{3}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Confusion matrix on test dataset   (cut at \texttt  {fc1} + SVM($C=100, \gamma =scale$)))\relax }}{3}\protected@file@percent }
 \newlabel{fig:cm1-test}{{7}{3}}
-\gdef \@abspage@last{3}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Dimensionality Reduction}{3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Confusion matrix on test dataset   (cut at \texttt  {fc1} + SVM($C=100, \gamma =scale$)))\relax }}{3}\protected@file@percent }
+\newlabel{fig:var1}{{8}{3}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Confusion matrix on training dataset   (cut at \texttt  {fc1} + PCA + SVM($C=5, \gamma =scale$))\relax }}{3}\protected@file@percent }
+\newlabel{fig:cm1-pca-train}{{9}{3}}
+\@writefile{toc}{\contentsline {section}{References}{3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Confusion matrix on test dataset   (cut at \texttt  {fc1} + PCA + SVM($C=5, \gamma =scale$))\relax }}{4}\protected@file@percent }
+\newlabel{fig:cm1-pca-test}{{10}{4}}

@@ -37,7 +37,7 @@
 The chosen dataset is called Intel$^\circledR$ Image Classification and it was initially published on Analytics Vidhya by Intel$^\circledR$ to host an image classification challenge to promote OpenVINO™, a toolkit or optimizing and deploying AI inference \cite{site1}\cite{site2}. \par
 
 The dataset contains images of natural scenes around the world and they belong to $6$ classes: buildings, forests, glaciers, mountains, sea and streets. The images are of size $150\times150$px and can be colored ($3$ channels, RGB) or rarely in grayscale (still with $3$ channels). Figure \ref{fig:samples} shows $16$ entries of the training dataset. \par
-There is a total of $\sim 24\,000$ images, divided into Train ($\sim14\,000$), Test ($\sim3\,000$) and Prediction ($\sim7\,000$) folders. The last one does not contain labels and it is intended for unsupervised learning and it will be ignored in this work.
+There is a total of ${\sim 24\,000}$ images, divided into Train (${\sim14\,000}$), Test (${\sim3\,000}$) and Prediction (${\sim7\,000}$) folders. The last one does not contain labels and it is intended for unsupervised learning and it will be ignored in this work.
 
 
 
@@ -132,12 +132,16 @@ Before attaching to the layer \texttt{fc1} the SVM, it is interesting to visuali
 
 In the projection through PCA are identifiable some clusters: glaciers and mountains are very similar, the same goes for streets and buildings. This make sense since the picture of the mountains may contain snow or ice and picture of buildings may contain the surrounding street, and viceversa. The seas borders with the glaciers but it does not blend with them. The forests are a separate concepts and it seems to not share anything with the other classes. \par
 Because the cut is very close to the VGG16's original output we expected an high accuracy in classifying the images.
-\subsection{Training of the model attached to SVM}
+
+
+
+
+\subsection{Extraction of the features and training of the SVM}
 Before starting with the training of the hybrid model, we chose the SVM's hyperparameters using \texttt{GridSearchCV} from sklearn. This function does an exhaustive search of the best parameters for the SVM in order to find the best separation hyperplane. The parameters to be chosen were the cost $C \in \{5, 10, 20, 100\}$ and the kernel coefficient $\gamma \in \{scale, auto\}$. This does not assure that it gives back the best configurations on unseen data. As a matter of fact we should had the best results with cost $C=100$ and $\gamma=auto$ (Figure \ref{fig:costs}), but in this case we achieved higher performances on the test dataset with $C=100$ and $\gamma=scale$. So we used \texttt{GridSearchCV} just like a starting point for further manual experimentations.
 
 \begin{figure}[ht!]
 \centering                                                                        
-\includegraphics[width=3.5in]{../images/costs.png}
+\includegraphics[width=3in]{../images/costs.png}
 \captionsetup{justification=centering}                                                                                         
 \caption{Model's performance on the training set with different configurations}
 \label{fig:costs}                                                                                                                               
@@ -149,9 +153,9 @@ The training accuracy reached $100\%$ and Figure \ref{fig:cm1-train} shows the c
 
 \begin{figure}[ht!]
 \centering                                                                        
-\includegraphics[width=3.5in]{../images/cm1-train.png}
+\includegraphics[width=3in]{../images/cm1-train.png}
 \captionsetup{justification=centering}                                                                                         
-\caption{Confusion matrix on training dataset (\texttt{fc1})}
+\caption{Confusion matrix on training dataset \\ (cut at \texttt{fc1} + SVM($C=100, \gamma=scale$))}
 \label{fig:cm1-train}                                                                                                                               
 \end{figure}
 
@@ -160,11 +164,65 @@ The test accuracy reached $92\%$ and Figure \ref{fig:cm1-test} shows the confusi
 
 \begin{figure}[ht!]
 \centering                                                                        
-\includegraphics[width=3.5in]{../images/cm1-test.png}
+\includegraphics[width=3in]{../images/cm1-test.png}
 \captionsetup{justification=centering}                                                                                         
-\caption{Confusion matrix on test dataset (\texttt{fc1})}
+\caption{Confusion matrix on test dataset \\ (cut at \texttt{fc1} + SVM($C=100, \gamma=scale$)))}
 \label{fig:cm1-test}                                                                                                                               
 \end{figure}
+
+The training phase for SVM took ${\sim550}$ seconds. We tried to simplify the model and thus decrease the timings by reducing the dimensionality of the features. In order to do so we used PCA as technique for dimensionality reduction.
+
+
+\subsection{Dimensionality Reduction}
+In this section we describe how we achieved high accuracy by reducing the dimensionality of the features in input.\par
+Before applying PCA, we estimated how many components were needed to describe the data. This can be determined by looking at the \emph{cumulative explained variance} ratio as a function of the number of components.
+
+The curve in Figure \ref{fig:var1} quantifies how much of the total $4096-$dimensional variance is contained within the first $n$ components. For example, we saw that the first ${\sim400}$ components contain approximately $80\%$ of the variance, while are needed around $2\,500$ components to describe $100\%$ of the variance.
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/var-1.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on test dataset \\ (cut at \texttt{fc1} + SVM($C=100, \gamma=scale$)))}
+\label{fig:var1}                                                                                                                               
+\end{figure}
+We chose a configuration that could preserve $90\%$ of the variance, \emph{i.e.} $777$ components. This could assure good perfomances while using just $19\%$ of the dimensions.\par
+In this case we found the optimal configuration for SVM $C=5$ and $\gamma=scale$.
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3in]{../images/cm1-pca-train.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on training dataset \\ (cut at \texttt{fc1} + PCA + SVM($C=5, \gamma=scale$))}
+\label{fig:cm1-pca-train}                                                                                                                               
+\end{figure}
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3in]{../images/cm1-pca-test.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on test dataset \\ (cut at \texttt{fc1} + PCA + SVM($C=5, \gamma=scale$))}
+\label{fig:cm1-pca-test}                                                                                                                               
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
