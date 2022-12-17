@@ -18,6 +18,7 @@
 \usepackage[bottom]{footmisc}
 \newfontfamily\listingsfont[Scale=.7]{inconsolata}\usepackage[font=footnotesize,labelfont=bf]{caption}
 \newcommand\todo[1]{\textcolor{red}{\textbf{TODO: #1}}}
+\newcommand{\shellcmd}[1]{\\\indent\texttt{#1}\\}
 %\captionsetup[algorithm2e]{font=footnotesize}
 \usepackage[table,xcdraw]{xcolor}
 \usepackage[utf8]{inputenc}
@@ -35,9 +36,9 @@
 
 
 \section{Dataset}\label{sec:insp}
-The chosen dataset is called Intel$^\circledR$ Image Classification and it was initially published on Analytics Vidhya by Intel$^\circledR$ to host an image classification challenge to promote OpenVINO™, a toolkit or optimizing and deploying AI inference \cite{site1}\cite{site2}. \par
+The chosen dataset is called Intel$^\circledR$ Image Classification and it was initially published on Analytics Vidhya by Intel$^\circledR$ to host an image classification challenge to promote OpenVINO™, a toolkit for optimizing and deploying AI inferences \cite{site1}\cite{site2}. \par
 
-The dataset contains images of natural scenes around the world and they belong to $6$ classes: buildings, forests, glaciers, mountains, sea and streets. The images are of size $150\times150$px and can be colored ($3$ channels, RGB) or rarely in grayscale (still with $3$ channels). Figure \ref{fig:samples} shows $16$ entries of the training dataset. \par
+The dataset contains images of natural scenes around the world and they belong to $6$ classes: buildings, forests, glaciers, mountains, sea and streets. The images are of size $150\times150$px and are colored ($3$ channels, RGB) or more rarely in grayscale (still with $3$ channels). Figure \ref{fig:samples} shows $16$ entries of the training dataset. \par
 There is a total of ${\sim 24\,000}$ images, divided into Train (${\sim14\,000}$), Test (${\sim3\,000}$) and Prediction (${\sim7\,000}$) folders. The last one does not contain labels and it is intended for unsupervised learning and it will be ignored in this work.
 
 
@@ -87,7 +88,6 @@ The $6$ classes are encoded with numbers $0$ to $5$ and Table \ref{tab:encode} s
 \section{The model} 
 The chosen dataset presented similarieties with ImageNet: the $6$ classes of Intel$^\circledR$ Image Classification are scattered and distributed in the $1\,000$ classes of ImageNet. For this reason a pretrained model on ImageNet speeded up the learning process. The chosen model is VGG16, a $16-$layers deep CNN proposed by Karen Simonyan and Andrew Zisserman at the University of Oxford\cite{vgg16}. Figure \ref{fig:vgg16} shows an overview of its architecture.
 
-\todo{preprocessing}
 
 
 \begin{figure}[ht!]
@@ -98,16 +98,16 @@ The chosen dataset presented similarieties with ImageNet: the $6$ classes of Int
 \label{fig:vgg16}                                                                                                                               
 \end{figure}
 
-In this work we proposed different cuts to the network and feeded its outputs to a "classic" machine learning model, a SVM, and benchmark the performance of the hybrid architecture. \par
+In this work we proposed different cuts to the network and feeded the extraxted features into a "classic" machine learning model, a SVM, and benchmarked the performances of this hybrid architecture. \par
 
 The chosen cuts were after the first dense layer (\texttt{fc1}), after the fourth pooling layer (\texttt{block4\_pool}) 
-and after the third pooling layer (\texttt{block3\_pool}). The different cuts led to different challenges, such as the high dimensionality of the features.
+and after the third pooling layer (\texttt{block3\_pool}). The different cuts led to different challenges, such as the very high dimensionality of the features.
 
 
-As the cuts approached the input, the number of trainable parameters decreased exponentially; however the representation of the features will have an increasingly higher dimension. The higher dimensionality affects the training performance of the SVM and a fine tuning on the management of the memory. For this reason we used less samples during the training phase as the dimensionality increased, raising the risk of underfitting. Table \ref{tab:dims} describes the numbers of the problems.
+As the cuts approached the input, the number of trainable parameters decreased exponentially; however the representation of the features had an increasingly higher dimension. The higher dimensionality affects the training performance of the SVM and a fine tuning on the management of the memory was required. For this reason we used less samples during the training phase as the dimensionality increased, raising the risk of underfitting. Table \ref{tab:dims} shows the details at each stage.
 
 
-\begin{table}[]
+\begin{table}[ht!]
 \centering
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{|l|c|l|}
@@ -122,8 +122,8 @@ As the cuts approached the input, the number of trainable parameters decreased e
 \label{tab:dims}
 \end{table}
 
-
-
+\section{Preprocessing}
+Each image was preprocessed in the same way images from ImageNet were preprocessed during the training of VGG16. That is each image is converted from RGB to BGR, then each color channel is zero-centered with respect to the ImageNet dataset, without scaling. This guaranteed that the performances VGG16 demonstrated with ImageNet could be reproduced with this dataset.
 
 \section{First cutting point: \texttt{fc1}}\label{sec:fc1}
 
@@ -133,7 +133,7 @@ Before attaching to the layer \texttt{fc1} the SVM, it is interesting to visuali
 \centering                                                                        
 \includegraphics[width=3.5in]{../images/pca-1.png}
 \captionsetup{justification=centering}                                                                                         
-\caption{Architecture of VGG16 with the cuts applied in this work}
+\caption{PCA projection at \texttt{fc1} layer}
 \label{fig:pca1}                                                                                                                               
 \end{figure}
 
@@ -144,7 +144,7 @@ Because the cut is very close to the VGG16's original output we expected an high
 
 
 \subsection{Extraction of the features and training of the SVM}
-Before starting with the training of the hybrid model, we chose the SVM's hyperparameters using \texttt{GridSearchCV} from sklearn. This function does an exhaustive search of the best parameters for the SVM in order to find the best separation hyperplane. The parameters to be chosen were the cost $C \in \{5, 10, 20, 100\}$ and the kernel coefficient $\gamma \in \{scale, auto\}$. This does not assure that it gives back the best configurations on unseen data. As a matter of fact we should had the best results with cost $C=100$ and $\gamma=auto$ (Figure \ref{fig:costs}), but in this case we achieved higher performances on the test dataset with $C=100$ and $\gamma=scale$. So we used \texttt{GridSearchCV} just like a starting point for further manual experimentations.
+Before starting with the training of the classic model, we chose the SVM's hyperparameters using \texttt{GridSearchCV} from sklearn. This function does an exhaustive search of the best parameters for the SVM in order to find the best separation hyperplane. The parameters to be chosen were the cost $C \in \{5, 10, 20, 100\}$ and the kernel coefficient $\gamma \in \{scale, auto\}$. This does not assure that it gives back the best configurations on unseen data. As a matter of fact we should had the best results with cost $C=100$ and $\gamma=auto$ (Figure \ref{fig:costs}), but in this case we achieved higher performances on the test dataset with $C=100$ and $\gamma=scale$. So we used \texttt{GridSearchCV} just like a starting point for further manual experimentations.
 
 \begin{figure}[ht!]
 \centering                                                                        
@@ -184,7 +184,7 @@ The training phase for SVM took ${\sim550}$ seconds. We tried to simplify the mo
 In this section we describe how we achieved high accuracy by reducing the dimensionality of the features in input.\par
 Before applying PCA, we estimated how many components were needed to describe the data. This can be determined by looking at the \emph{cumulative explained variance} ratio as a function of the number of components.
 
-The curve in Figure \ref{fig:var1} quantifies how much of the total $4096-$dimensional variance is contained within the first $n$ components. For example, we saw that the first ${\sim400}$ components contain approximately $80\%$ of the variance, while are needed around $2\,500$ components to describe $100\%$ of the variance.
+The curve in Figure \ref{fig:var1} quantifies how much of the total $4096-$dimensional variance is contained within the first $n$ components. For example, we saw that the first ${\sim400}$ components contain approximately $80\%$ of the variance, while are needed around $2\,500$ components to describe almost $100\%$ of the variance.
 \begin{figure}[ht!]
 \centering                                                                        
 \includegraphics[width=3.5in]{../images/var-1.png}
@@ -234,7 +234,7 @@ Like in section \ref{sec:fc1} we repeated the experiment of visualizing the feat
 \centering                                                                        
 \includegraphics[width=3.5in]{../images/pca-2.png}
 \captionsetup{justification=centering}                                                                                         
-\caption{Architecture of VGG16 with the cuts applied in this work}
+\caption{PCA projection at \texttt{block4\_pool} layer}
 \label{fig:pca2}                                                                                                                               
 \end{figure}
 
@@ -262,7 +262,7 @@ The training accuracy reached again $100\%$ and Figure \ref{fig:cm2-train} shows
 \label{fig:cm2-train}                                                                                                                               
 \end{figure}
 
-The test accuracy reached $89\%$ and Figure \ref{fig:cm2-test} shows the confusion matrix. We can notice the aforementioned confusion between sea and mountain or glaciers but is not compromising the overall accuracy of the model.
+The test accuracy reached $89\%$ and Figure \ref{fig:cm2-test} shows the confusion matrix. We can notice the aforementioned confusion between sea and mountain or glaciers but did not compromise the overall accuracy of the model.
 
 
 \begin{figure}[ht!]
@@ -332,7 +332,7 @@ Like in section \ref{sec:fc1} we repeated the experiment of visualizing the feat
 \centering                                                                        
 \includegraphics[width=3.5in]{../images/pca-3.png}
 \captionsetup{justification=centering}                                                                                         
-\caption{Architecture of VGG16 with the cuts applied in this work}
+\caption{PCA projection at \texttt{block3\_pool} layer}
 \label{fig:pca3}                                                                                                                               
 \end{figure}
 
@@ -347,7 +347,7 @@ At this stage the number of trainable parameters of the CNN decreased by ${\sim9
 
 
 \subsection{Extraction of the features and training of the SVM}
-We performed an exhaustive search with \texttt{GridSearchCV} plus some manual experimentation and we found that a good configuration for the SVM is $C=10$ and $\gamma=scale$. Because of the increased dimensionality we used less images for training (from $800$ to $500$) in order to not saturate the memory. 	\par
+We performed an exhaustive search with \texttt{GridSearchCV} plus some manual experimentation and we found that a good configuration for the SVM is $C=10$ and $\gamma=scale$. Because of the increased dimensionality we used less images for training (from $400$ to $300$) in order to not saturate the memory. 	\par
 
 The training accuracy reached again $100\%$ and Figure \ref{fig:cm3-train} shows the confusion matrix. 
 
@@ -410,9 +410,23 @@ The application of a technique of dimensionality reduction
 decreased the test accuracy of a reasonable amount, it didn't resolved the problem of overfitting (which is not guaranteed by PCA) but decreased the training times from $1340$ seconds to $160$ seconds.
 
 
+\section{Implementation}
+In this section we describe how to execute the code that helped to produce this work. \par
+\noindent Run
+\shellcmd{python3 trainer-1.py --cut fc1 --c1 100 --c2 5}
+to execute the first cut, train the SVM witn $C=100$, execute the PCA on $90\%$ of explained variance and train the SVM with $C=5$. 
+\noindent Run
+\shellcmd{python3 trainer-1.py --cut block4\_pool --c1 10 --c2 5}
+to execute the second experiment. \par
+\noindent Run
+\shellcmd{python3 trainer-1.py --cut block3\_pool --c1 10 --c2 5}
+to execute the third experiment. \par
+Use $\texttt{--skip}$ to skip the first training and jump to PCA. Use \texttt{--train <n>} and \texttt{--test <n>} to set the number of images for each classes to be used for training and test. Use \texttt{--help} for any information about the executable.
+
+
 \section{Conclusions}
 In general, features extracted at deeper layers (closer to the original output) produced features that guaranteed highly accurate classifications, with $92\%$ 
-of accuracy on test data. Appliying cuttings at higher level (closer to the input) the dimensionality of the features increased so much that the usage of techniques of  dimensional reduction became crucial in order to use them in the SVM classifier. Performances, in terms of accuracy and training time, got worse and  we note the presence of overfitting especially in the last classifiers. The results in this works are affected by the memory limitations; without these limitations the results could be different.
+of accuracy on test data. Appliying cuttings at higher level (closer to the input) the dimensionality of the features increased so much that the usage of techniques of  dimensional reduction became crucial in order to use them in the SVM classifier. Performances, in terms of accuracy and training time, got worse and  we noted the presence of overfitting especially in the last classifiers. The results in this works were affected by the memory limitations; without these limitations the results could had been different.
 
 
 
