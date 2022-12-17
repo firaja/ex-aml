@@ -17,6 +17,7 @@
 \usepackage{mathabx}
 \usepackage[bottom]{footmisc}
 \newfontfamily\listingsfont[Scale=.7]{inconsolata}\usepackage[font=footnotesize,labelfont=bf]{caption}
+\newcommand\todo[1]{\textcolor{red}{\textbf{TODO: #1}}}
 %\captionsetup[algorithm2e]{font=footnotesize}
 \usepackage[table,xcdraw]{xcolor}
 \usepackage[utf8]{inputenc}
@@ -86,6 +87,8 @@ The $6$ classes are encoded with numbers $0$ to $5$ and Table \ref{tab:encode} s
 \section{The model} 
 The chosen dataset presented similarieties with ImageNet: the $6$ classes of Intel$^\circledR$ Image Classification are scattered and distributed in the $1\,000$ classes of ImageNet. For this reason a pretrained model on ImageNet speeded up the learning process. The chosen model is VGG16, a $16-$layers deep CNN proposed by Karen Simonyan and Andrew Zisserman at the University of Oxford\cite{vgg16}. Figure \ref{fig:vgg16} shows an overview of its architecture.
 
+\todo{preprocessing}
+
 
 \begin{figure}[ht!]
 \centering                                                                        
@@ -151,7 +154,7 @@ Before starting with the training of the hybrid model, we chose the SVM's hyperp
 \label{fig:costs}                                                                                                                               
 \end{figure}
 
-An issue when using hybrid models are some incompatabilities between libraries: we started using Tensorflow's \texttt{DirectoryIterator} or \texttt{Dataset} in order to efficiently load the dataset in batches and to not saturate the memory; unfortunately sklearn does not support this kind of data structure and the only feasible solution was to diminuish the number of samples during the training and test phases. With this cutting point we used $1\,000$ images per class when training and $450$ when testing. \par
+An issue when using hybrid models are some incompatabilities between libraries: we started using Tensorflow's \texttt{DirectoryIterator} or \texttt{Dataset} in order to efficiently load the dataset in batches and to not saturate the memory; unfortunately sklearn does not support this kind of data structure and the only feasible solution was to diminuish the number of samples during the training and test phases. With this cutting point we used $800$ images per class when training and $300$ when testing. \par
 The training accuracy reached $100\%$ and Figure \ref{fig:cm1-train} shows the confusion matrix. 
 
 
@@ -186,7 +189,7 @@ The curve in Figure \ref{fig:var1} quantifies how much of the total $4096-$dimen
 \centering                                                                        
 \includegraphics[width=3.5in]{../images/var-1.png}
 \captionsetup{justification=centering}                                                                                         
-\caption{Confusion matrix on test dataset \\ (cut at \texttt{fc1} + SVM($C=100, \gamma=scale$)))}
+\caption{The cumulative explained variance of the $4\,096$ components}
 \label{fig:var1}                                                                                                                               
 \end{figure}
 We chose a configuration that could preserve $90\%$ of the variance, \emph{i.e.} $777$ components. This could assure good perfomances while using just $19\%$ of the dimensions.\par
@@ -224,6 +227,7 @@ The lower accuracy and higher overfitting are traded off with faster times in tr
 
 \section{Second cutting point: \texttt{block4\_pool}}
 
+
 Like in section \ref{sec:fc1} we repeated the experiment of visualizing the features extracted from layer \texttt{block4\_pool} through PCA and plotted the graph in Figure \ref{fig:pca2}.
 
 \begin{figure}[ht!]
@@ -237,7 +241,178 @@ Like in section \ref{sec:fc1} we repeated the experiment of visualizing the feat
 This time the sea, glacier and mountain classes collapsed in one cluster. This anticipated that images belonging to these classes could be classified with lower accuracy.
 The cluster of images of forest is the only one that did not collide with any other.
 We also noticed more isolated images being completely misclassified than the previous cut, \emph{e.g.} some images of mountain or sea are predicted as building or street.
+\par
 
+
+
+At this stage the number of trainable parameters of the CNN decreased by ${\sim93.5\%}$ but the dimensionality of the features increased 25 times, reaching $100\,352$. This made the application of PCA more crucial. 
+
+
+\subsection{Extraction of the features and training of the SVM}
+We performed an exhaustive search with \texttt{GridSearchCV} plus some manual experimentation and we found that a good configuration for the SVM is $C=10$ and $\gamma=scale$. Because of the increased dimensionality we used less images for training (from $800$ to $500$) in order to not saturate the memory. 	\par
+
+The training accuracy reached again $100\%$ and Figure \ref{fig:cm2-train} shows the confusion matrix. 
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3in]{../images/cm2-train.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on training dataset \\ (cut at \texttt{block4\_pool} + SVM($C=10, \gamma=scale$))}
+\label{fig:cm2-train}                                                                                                                               
+\end{figure}
+
+The test accuracy reached $89\%$ and Figure \ref{fig:cm2-test} shows the confusion matrix. We can notice the aforementioned confusion between sea and mountain or glaciers but is not compromising the overall accuracy of the model.
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3in]{../images/cm2-test.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on test dataset \\ (cut at \texttt{block4\_pool} + SVM($C=10, \gamma=scale$)))}
+\label{fig:cm2-test}                                                                                                                               
+\end{figure}
+
+\subsection{Dimensionality Reduction}
+
+We proceeded with the estimation of the optimal number of components in order to describe at least the $90\%$ of the variance.
+From Figure \ref{fig:var2} we can notice that the $90\%$ of the variance can be described with $1\,850$ components, leading to a compression of $39\%$.
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/var-2.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{The cumulative explained variance of the $3\,000$ components}
+\label{fig:var2}                                                                                                                               
+\end{figure}
+
+
+Please note that PCA operated on a dataset $D \in \mathcal{M}_{m \times n}$ calculates the maximum number of components to keep
+$c = min\{m, n\}$. \par
+
+In this case the optimal configuration for the SVM was $C=5$ and $\gamma=scale$; the model reached again $100\%$ of accuracy on the training data and $86\%$ on the test data. 
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3in]{../images/cm2-pca-train.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on training dataset \\ (cut at \texttt{block4\_pool} + PCA + SVM($C=5, \gamma=scale$))}
+\label{fig:cm2-pca-train}                                                                                                                               
+\end{figure}
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3in]{../images/cm2-pca-test.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on test dataset \\ (cut at \texttt{block4\_pool} + PCA + SVM($C=5, \gamma=scale$))}
+\label{fig:cm2-pca-test}                                                                                                                               
+\end{figure}
+
+From Figure \ref{fig:cm2-pca-test} we noticed that images of streets or buildings were confused with forests for the first time; the more accurate classifications were regstered for images of street, glacier and sea. 
+The application of a technique of dimensionality reduction
+decreased the test accuracy of a reasonable amount, it didn't resolved the problem of overfitting (which is not guaranteed by PCA) but decreased the training times from $633$ seconds to $58$ seconds. 
+
+
+
+
+
+
+
+
+
+
+
+\section{Second cutting point: \texttt{block3\_pool}}
+
+
+Like in section \ref{sec:fc1} we repeated the experiment of visualizing the features extracted from layer \texttt{block3\_pool} through PCA and plotted the graph in Figure \ref{fig:pca3}.
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/pca-3.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Architecture of VGG16 with the cuts applied in this work}
+\label{fig:pca3}                                                                                                                               
+\end{figure}
+
+This time the sea, glacier and mountain classes collapsed in one cluster. This anticipated that images belonging to these classes could be classified with lower accuracy.
+The cluster of images of forest is the only one that did not collide with any other.
+We also noticed more isolated images being completely misclassified than the previous cut, \emph{e.g.} some images of mountain or sea are predicted as building or street.
+\par
+
+
+
+At this stage the number of trainable parameters of the CNN decreased by ${\sim93.5\%}$ but the dimensionality of the features increased 25 times, reaching $100\,352$. This made the application of PCA more crucial. 
+
+
+\subsection{Extraction of the features and training of the SVM}
+We performed an exhaustive search with \texttt{GridSearchCV} plus some manual experimentation and we found that a good configuration for the SVM is $C=10$ and $\gamma=scale$. Because of the increased dimensionality we used less images for training (from $800$ to $500$) in order to not saturate the memory. 	\par
+
+The training accuracy reached again $100\%$ and Figure \ref{fig:cm3-train} shows the confusion matrix. 
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3in]{../images/cm3-train.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on training dataset \\ (cut at \texttt{block3\_pool} + SVM($C=10, \gamma=scale$))}
+\label{fig:cm3-train}                                                                                                                               
+\end{figure}
+
+The test accuracy reached $89\%$ and Figure \ref{fig:cm3-test} shows the confusion matrix. We can notice the aforementioned confusion between sea and mountain or glaciers but is not compromising the overall accuracy of the model.
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3in]{../images/cm3-test.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on test dataset \\ (cut at \texttt{block3\_pool} + SVM($C=10, \gamma=scale$)))}
+\label{fig:cm3-test}                                                                                                                               
+\end{figure}
+
+\subsection{Dimensionality Reduction}
+
+We proceeded with the estimation of the optimal number of components in order to describe at least the $90\%$ of the variance.
+From Figure \ref{fig:var3} we can notice that the $90\%$ of the variance can be described with $1\,560$ components, leading to a compression of $35\%$.
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3.5in]{../images/var-3.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{The cumulative explained variance of the $3\,000$ components}
+\label{fig:var3}                                                                                                                               
+\end{figure}
+
+
+
+In this case the optimal configuration for the SVM was $C=5$ and $\gamma=scale$; the model reached again $100\%$ of accuracy on the training data and $86\%$ on the test data. 
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3in]{../images/cm3-pca-train.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on training dataset \\ (cut at \texttt{block3\_pool} + PCA + SVM($C=5, \gamma=scale$))}
+\label{fig:cm3-pca-train}                                                                                                                               
+\end{figure}
+
+
+\begin{figure}[ht!]
+\centering                                                                        
+\includegraphics[width=3in]{../images/cm3-pca-test.png}
+\captionsetup{justification=centering}                                                                                         
+\caption{Confusion matrix on test dataset \\ (cut at \texttt{block3\_pool} + PCA + SVM($C=5, \gamma=scale$))}
+\label{fig:cm3-pca-test}                                                                                                                               
+\end{figure}
+
+From Figure \ref{fig:cm3-pca-test} we noticed that images of streets or buildings were confused with forests for the first time; the more accurate classifications were regstered for images of street, glacier and sea. 
+The application of a technique of dimensionality reduction
+decreased the test accuracy of a reasonable amount, it didn't resolved the problem of overfitting (which is not guaranteed by PCA) but decreased the training times from $1340$ seconds to $160$ seconds.
+
+
+\section{Conclusions}
+In general, features extracted at deeper layers (closer to the original output) produced features that guaranteed highly accurate classifications, with $92\%$ 
+of accuracy on test data. Appliying cuttings at higher level (closer to the input) the dimensionality of the features increased so much that the usage of techniques of  dimensional reduction became crucial in order to use them in the SVM classifier. Performances, in terms of accuracy and training time, got worse and  we note the presence of overfitting especially in the last classifiers. The results in this works are affected by the memory limitations; without these limitations the results could be different.
 
 
 
