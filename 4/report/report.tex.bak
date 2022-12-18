@@ -38,7 +38,7 @@
 \section{Dataset}\label{sec:insp}
 The chosen dataset is called Intel$^\circledR$ Image Classification and it was initially published on Analytics Vidhya by Intel$^\circledR$ to host an image classification challenge to promote OpenVINO™, a toolkit for optimizing and deploying AI inferences \cite{site1}\cite{site2}. \par
 
-The dataset contains images of natural scenes around the world and they belong to $6$ classes: buildings, forests, glaciers, mountains, sea and streets. The images are of size $150\times150$px and are colored ($3$ channels, RGB) or more rarely in gray-scale (still with $3$ channels). Figure \ref{fig:samples} shows $16$ entries of the training dataset. \par
+The dataset contains images of natural scenes around the world and they belong to $6$ classes: buildings, forests, glaciers, mountains, sea and streets. The images are of size $150\times150$px and are colored ($3$ channels, RGB) or more rarely in grayscale (still with $3$ channels). Figure \ref{fig:samples} shows $16$ entries of the training dataset. \par
 There is a total of ${\sim 24\,000}$ images, divided into Train (${\sim14\,000}$), Test (${\sim3\,000}$) and Prediction (${\sim7\,000}$) folders. The last one does not contain labels and it is intended for unsupervised learning and it will be ignored in this work.
 
 
@@ -86,7 +86,7 @@ The $6$ classes are encoded with numbers $0$ to $5$ and Table \ref{tab:encode} s
 
 
 \section{The model} 
-The chosen dataset presented similarities with ImageNet: the $6$ classes of Intel$^\circledR$ Image Classification are scattered and distributed in the $1\,000$ classes of ImageNet. For this reason a pretrained model on ImageNet sped up the learning process. The chosen model is VGG16, a $16-$layers deep CNN proposed by Karen Simonyan and Andrew Zisserman at the University of Oxford\cite{vgg16}. Figure \ref{fig:vgg16} shows an overview of its architecture.
+The chosen dataset presented similarieties with ImageNet: the $6$ classes of Intel$^\circledR$ Image Classification are scattered and distributed in the $1\,000$ classes of ImageNet. For this reason a pretrained model on ImageNet speeded up the learning process. The chosen model is VGG16, a $16-$layers deep CNN proposed by Karen Simonyan and Andrew Zisserman at the University of Oxford\cite{vgg16}. Figure \ref{fig:vgg16} shows an overview of its architecture.
 
 
 
@@ -98,7 +98,7 @@ The chosen dataset presented similarities with ImageNet: the $6$ classes of Inte
 \label{fig:vgg16}                                                                                                                               
 \end{figure}
 
-In this work we proposed different cuts to the network and fed the extracted features into a "classic" machine learning model, a SVM, and made a benchmark of the performances of this hybrid architecture. \par
+In this work we proposed different cuts to the network and feeded the extraxted features into a "classic" machine learning model, a SVM, and benchmarked the performances of this hybrid architecture. \par
 
 The chosen cuts were after the first dense layer (\texttt{fc1}), after the fourth pooling layer (\texttt{block4\_pool}) 
 and after the third pooling layer (\texttt{block3\_pool}). The different cuts led to different challenges, such as the very high dimensionality of the features.
@@ -137,14 +137,14 @@ Before attaching to the layer \texttt{fc1} the SVM, it is interesting to visuali
 \label{fig:pca1}                                                                                                                               
 \end{figure}
 
-In the projection through PCA are identifiable some clusters: glaciers and mountains are very similar, the same goes for streets and buildings. This make sense since the picture of the mountains may contain snow or ice and picture of buildings may contain the surrounding street, and vice versa. The seas borders with the glaciers but it does not blend with them. The forests are a separate concepts and it seems to not share anything with the other classes. \par
+In the projection through PCA are identifiable some clusters: glaciers and mountains are very similar, the same goes for streets and buildings. This make sense since the picture of the mountains may contain snow or ice and picture of buildings may contain the surrounding street, and viceversa. The seas borders with the glaciers but it does not blend with them. The forests are a separate concepts and it seems to not share anything with the other classes. \par
 Because the cut is very close to the VGG16's original output we expected an high accuracy in classifying the images.
 
 
 
 
 \subsection{Extraction of the features and training of the SVM}
-Before starting with the training of the classic model, we chose the SVM's hyper parameters using \texttt{GridSearchCV} from sklearn. This function does an exhaustive search of the best parameters for the SVM in order to find the best separation hyperplane. The parameters to be chosen were the cost $C \in \{5, 10, 20, 100\}$ and the kernel coefficient $\gamma \in \{scale, auto\}$. This does not assure that it gives back the best configurations on unseen data. As a matter of fact we should had the best results with cost $C=100$ and $\gamma=auto$ (Figure \ref{fig:costs}), but in this case we achieved higher performances on the test dataset with $C=100$ and $\gamma=scale$. So we used \texttt{GridSearchCV} just like a starting point for further manual experimentation.
+Before starting with the training of the classic model, we chose the SVM's hyperparameters using \texttt{GridSearchCV} from sklearn. This function does an exhaustive search of the best parameters for the SVM in order to find the best separation hyperplane. The parameters to be chosen were the cost $C \in \{5, 10, 20, 100\}$ and the kernel coefficient $\gamma \in \{scale, auto\}$. This does not assure that it gives back the best configurations on unseen data. As a matter of fact we should had the best results with cost $C=100$ and $\gamma=auto$ (Figure \ref{fig:costs}), but in this case we achieved higher performances on the test dataset with $C=100$ and $\gamma=scale$. So we used \texttt{GridSearchCV} just like a starting point for further manual experimentations.
 
 \begin{figure}[ht!]
 \centering                                                                        
@@ -154,7 +154,7 @@ Before starting with the training of the classic model, we chose the SVM's hyper
 \label{fig:costs}                                                                                                                               
 \end{figure}
 
-An issue when using hybrid models are some incompatibilities between libraries: we started using Tensorflow's \texttt{DirectoryIterator} or \texttt{Dataset} in order to efficiently load the dataset in batches and to not saturate the memory; unfortunately sklearn does not support this kind of data structure and the only feasible solution was to diminish the number of samples during the training and test phases. With this cutting point we used $800$ images per class when training and $300$ when testing. \par
+An issue when using hybrid models are some incompatabilities between libraries: we started using Tensorflow's \texttt{DirectoryIterator} or \texttt{Dataset} in order to efficiently load the dataset in batches and to not saturate the memory; unfortunately sklearn does not support this kind of data structure and the only feasible solution was to diminuish the number of samples during the training and test phases. With this cutting point we used $800$ images per class when training and $300$ when testing. \par
 The training accuracy reached $100\%$ and Figure \ref{fig:cm1-train} shows the confusion matrix. 
 
 
@@ -192,7 +192,7 @@ The curve in Figure \ref{fig:var1} quantifies how much of the total $4096-$dimen
 \caption{The cumulative explained variance of the $4\,096$ components}
 \label{fig:var1}                                                                                                                               
 \end{figure}
-We chose a configuration that could preserve $90\%$ of the variance, \emph{i.e.} $777$ components. This could assure good performances while using just $19\%$ of the dimensions.\par
+We chose a configuration that could preserve $90\%$ of the variance, \emph{i.e.} $777$ components. This could assure good perfomances while using just $19\%$ of the dimensions.\par
 In this case we found the optimal configuration of the SVM with $C=5$ and $\gamma=scale$.
 
 \begin{figure}[ht!]
@@ -309,7 +309,7 @@ In this case the optimal configuration for the SVM was $C=5$ and $\gamma=scale$;
 \label{fig:cm2-pca-test}                                                                                                                               
 \end{figure}
 
-From Figure \ref{fig:cm2-pca-test} we noticed that images of streets or buildings were confused with forests for the first time; the more accurate classifications were registered for images of street, glacier and sea. 
+From Figure \ref{fig:cm2-pca-test} we noticed that images of streets or buildings were confused with forests for the first time; the more accurate classifications were regstered for images of street, glacier and sea. 
 The application of a technique of dimensionality reduction
 decreased the test accuracy of a reasonable amount, it didn't resolved the problem of overfitting (which is not guaranteed by PCA) but decreased the training times from $633$ seconds to $58$ seconds. 
 
@@ -404,7 +404,7 @@ In this case the optimal configuration for the SVM was $C=5$ and $\gamma=scale$;
 \label{fig:cm3-pca-test}                                                                                                                               
 \end{figure}
 
-From Figure \ref{fig:cm3-pca-test} we noticed that images of streets or buildings were confused with forests for the first time; the more accurate classifications were registered for images of street, glacier and sea. 
+From Figure \ref{fig:cm3-pca-test} we noticed that images of streets or buildings were confused with forests for the first time; the more accurate classifications were regstered for images of street, glacier and sea. 
 The application of a technique of dimensionality reduction
 decreased the test accuracy a lot, it didn't resolved the problem of overfitting (which is not guaranteed by PCA) but decreased the training times from $1340$ seconds to $160$ seconds. 
 
@@ -413,7 +413,7 @@ decreased the test accuracy a lot, it didn't resolved the problem of overfitting
 In this section we describe how to execute the code that helped to produce this work. \par
 \noindent Run
 \shellcmd{python3 trainer-1.py --cut fc1 --c1 100 --c2 5}
-to execute the first cut, train the SVM wit $C=100$, execute the PCA on $90\%$ of explained variance and train the SVM with $C=5$. 
+to execute the first cut, train the SVM witn $C=100$, execute the PCA on $90\%$ of explained variance and train the SVM with $C=5$. 
 \noindent Run
 \shellcmd{python3 trainer-1.py --cut block4\_pool --c1 10 --c2 5}
 to execute the second experiment. \par
@@ -424,7 +424,7 @@ Use $\texttt{--skip}$ to skip the first training and jump to PCA. Use \texttt{--
 
 
 \section{Conclusions}
-In general, features extracted at deeper layers (closer to the original output) produced features that guaranteed highly accurate classifications, with $92\%$ and $88\%$ of accuracy on test data before and after PCA. Applying cuttings at higher levels (closer to the input) made the dimensionality of the features increase so much that the usage of techniques of dimensional reduction became crucial in order to use them in the SVM classifier. Performances, in terms of accuracy and training time, got worse and  we noted the presence of overfitting especially in the last classifiers.
+In general, features extracted at deeper layers (closer to the original output) produced features that guaranteed highly accurate classifications, with $92\%$ and $88\%$ of accuracy on test data before and after PCA. Appliying cuttings at higher levels (closer to the input) made the dimensionality of the features increase so much that the usage of techniques of dimensional reduction became crucial in order to use them in the SVM classifier. Performances, in terms of accuracy and training time, got worse and  we noted the presence of overfitting especially in the last classifiers.
 \par The results in this works were affected by memory limitations; without these limitations the results may have been different.
 
 \begin{figure}[ht!]
